@@ -1,4 +1,4 @@
-package org.hu.happi.model;
+package org.todss.model;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;

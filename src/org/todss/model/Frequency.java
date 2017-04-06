@@ -1,4 +1,4 @@
-package org.hu.happi.model;
+package org.todss.model;
 
 public enum Frequency {
     HALF_DAY(12),
