@@ -4,7 +4,6 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="571.0" prefWidth="734.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.todss.MainController">
    <center>
       <GridPane fx:id="grid" BorderPane.alignment="CENTER">
@@ -64,6 +63,14 @@
                   <Label text="Zondag" />
                </children>
             </FlowPane>
+            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" />
+            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="1" />
+            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="2" />
+            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="3" />
+            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="4" />
+            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="5" />
+            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="6" />
+            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="7" />
          </children>
       </GridPane>
    </center>
