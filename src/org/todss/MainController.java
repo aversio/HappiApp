@@ -15,6 +15,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.todss.model.Alarm;
 import org.todss.model.Frequency;
+import org.todss.model.Travel;
 
 import java.net.URL;
 import java.time.*;
@@ -49,7 +50,7 @@ public class MainController implements Initializable {
 	@FXML
 	private GridPane grid;
 
-	private Alarm alarm = new Alarm(Frequency.DAY, ZonedDateTime.parse("2017-04-07T08:00+02:00", DateTimeFormatter.ISO_DATE_TIME));
+	public static Alarm ALARM = new Alarm(Frequency.DAY, ZonedDateTime.parse("2017-04-07T08:00+02:00", DateTimeFormatter.ISO_DATE_TIME));
 
 	private static final int OFFSET = 8;
 
@@ -87,6 +88,8 @@ public class MainController implements Initializable {
 		departureTime.setText(departure.getHour() + ":" + departure.getMinute());
 		arrivalTime.setText(arrival.getHour() + ":" + arrival.getMinute());
 		generate(null, null);
+		//listView.getSelectionModel().select("Australia/West");
+		listView.getSelectionModel().select("America/Atka");
 	}
 
 	private void checkFlight() {
@@ -101,7 +104,7 @@ public class MainController implements Initializable {
 	}
 
 	public void generate(ZonedDateTime from, ZoneId zoneId) {
-		List<ZonedDateTime> dates = alarm.getScheme(7, null, from, zoneId);
+		List<ZonedDateTime> dates = ALARM.getScheme(7, null, from, zoneId);
 		for(int i = 1; i < OFFSET; i++) {
 			for (int i2 = 1; i2 < OFFSET; i2++) {
 				Node node = getNode(i, i2);

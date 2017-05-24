@@ -3,14 +3,13 @@ package org.todss;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import org.todss.pipeline.Pipeline;
-import org.todss.pipeline.stage.impl.Stage1;
-import org.todss.pipeline.stage.impl.Stage2;
 
 import java.net.URL;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Main extends Application {
 
@@ -32,12 +31,6 @@ public class Main extends Application {
 		pane.getStylesheets().add("file:data/css/style.css");
 		stage.setScene(new Scene(pane, pane.getPrefWidth(), pane.getPrefHeight(), true));
 		stage.show();
-
-		Pipeline<Integer> pipeline = new Pipeline<>(3);
-		pipeline.addStage(new Stage1());
-		pipeline.addStage(new Stage2());
-		pipeline.run();
-		System.out.println(pipeline.get());
 	}
 
 }

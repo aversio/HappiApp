@@ -1,40 +1,33 @@
 package org.todss.model;
 
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 public class Travel {
-    private OffsetDateTime departure;
-    private OffsetDateTime arrival;
-    private ZoneId destinationZoneId;
 
-    public Travel(OffsetDateTime departure, OffsetDateTime arrival, ZoneId destinationZoneId) {
+    private ZonedDateTime departure;
+
+    private ZonedDateTime arrival;
+
+    public Travel(ZonedDateTime departure, ZonedDateTime arrival) {
         this.departure = departure;
         this.arrival = arrival;
-        this.destinationZoneId = destinationZoneId;
     }
 
-    public OffsetDateTime getDeparture() {
+    public ZonedDateTime getDeparture() {
         return departure;
     }
 
-    public void setDeparture(OffsetDateTime departure) {
+    public void setDeparture(ZonedDateTime departure) {
         this.departure = departure;
     }
 
-    public OffsetDateTime getArrival() {
+    public ZonedDateTime getArrival() {
         return arrival;
     }
 
-    public void setArrival(OffsetDateTime arrival) {
+    public void setArrival(ZonedDateTime arrival) {
         this.arrival = arrival;
     }
 
-    public ZoneId getDestinationZoneId() {
-        return destinationZoneId;
-    }
-
-    public void setDestinationZoneId(ZoneId destinationZoneId) {
-        this.destinationZoneId = destinationZoneId;
-    }
 }

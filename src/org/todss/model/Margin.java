@@ -12,4 +12,8 @@ public enum Margin {
 		this.hours = hours;
 	}
 
+	public int getHours() {
+		return hours;
+	}
+
 }
