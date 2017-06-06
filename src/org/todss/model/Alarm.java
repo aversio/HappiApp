@@ -43,9 +43,9 @@ public class Alarm {
 					updated = true;
 					ZonedDateTime newDate = date.withZoneSameInstant(zoneId);
 					int difference = newDate.getHour() - date.getHour();
-					int margin = frequency.getMargin().getHours();
+					int margin = frequency.getMargin();
 					if (difference < -margin || difference > margin) {
-						int daysBefore = (int) Math.ceil((double) (difference < 0 ? -difference : difference) / frequency.getMargin().getHours());
+						int daysBefore = (int) Math.ceil((double) (difference < 0 ? -difference : difference) / frequency.getMargin());
 						int completedDifference = 0;
 						int counter = daysBefore;
 						System.out.println("Difference=" + difference + ", dagen om af te bakenen=" + daysBefore);

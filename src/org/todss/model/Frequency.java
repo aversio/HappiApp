@@ -1,14 +1,14 @@
 package org.todss.model;
 
 public enum Frequency {
-    HALF_DAY(12, Margin.HALF_DAY),
-    DAY(24, Margin.DAILTY);
+    HALF_DAY(12, 2),
+    DAY(24, 4);
 
     private int hours;
 
-    private Margin margin;
+    private int margin;
 
-    Frequency(int hours, Margin margin) {
+    Frequency(int hours, int margin) {
         this.hours = hours;
         this.margin = margin;
     }
@@ -17,7 +17,7 @@ public enum Frequency {
         return hours;
     }
 
-    public Margin getMargin() {
+    public int getMargin() {
     	return margin;
 	}
 
