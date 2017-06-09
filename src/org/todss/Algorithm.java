@@ -1,6 +1,9 @@
 package org.todss;
 
-import org.todss.model.*;
+import org.todss.model.Alarm;
+import org.todss.model.Intake;
+import org.todss.model.Path;
+import org.todss.model.Travel;
 
 import java.time.Duration;
 import java.time.ZoneId;
@@ -14,52 +17,99 @@ import java.util.PriorityQueue;
 import static java.lang.Math.round;
 import static java.lang.StrictMath.abs;
 
+/**
+ * Algorithm for an alarm with travels in mind.
+ *
+ * All times are in minutes.
+ */
 class Algorithm {
+    /**
+     * Alarm with desired time.
+     */
     private Alarm alarm;
+
+    /**
+     * Travel for converting the alarm time.
+     */
     private Travel travel;
 
+    /**
+     * Queue for all the possible paths, order by cost.
+     */
     private PriorityQueue<Path> completedPaths = new PriorityQueue<>(Comparator.comparingLong(Path::getCost));
 
-    private int count;
+    /**
+     * Setting for max cost of a path.
+     */
+    private int maxCost;
 
-    private int maxCost = 700;
-    private boolean checkIsPossible = true;
+    /**
+     * Setting for checking if a calculated intake is possible.
+     */
+    private boolean checkIsPossible;
 
+    {
+        checkIsPossible = true;
+        maxCost = 700;
+    }
+
+    /**
+     * New algorithm for calculating paths.
+     *
+     * @param alarm Desired time for alarm
+     * @param travel Travel for new time zone
+     */
     Algorithm(Alarm alarm, Travel travel) {
         this.alarm = alarm;
         this.travel = travel;
-
-        execute();
     }
 
+    /**
+     * Date-time for starting calculating moments.
+     *
+     * Is always enough time for using the margin to change the alarm for half a day.
+     *
+     * @return The date-time for starting the calculations
+     */
     private ZonedDateTime getStart() {
-        int test = 3;
-        if (alarm.getFrequency() == Frequency.HALF_DAY) {
-            test = 6;
-        }
+        int minusFrequency = 0;
+
+        if (alarm.getMargin() > 0)
+            minusFrequency = 12 * 60 / alarm.getMargin();
 
         return travel.getDeparture()
                 .withHour(alarm.getStart().getHour())
                 .withMinute(alarm.getStart().getMinute())
-                .minusMinutes(test * alarm.getFrequency().getMinutes());
+                .minusMinutes(minusFrequency * alarm.getFrequency().getMinutes());
     }
 
-    private long difference(ZonedDateTime one, ZonedDateTime two) {
-        return Duration.between(one, two).toMinutes();
-    }
-
+    /**
+     * Calculates the desired date-time for alarm.
+     *
+     * Uses the `getStart()` method.
+     *
+     * @param counter moments after start
+     * @return the desired date-time for alarm
+     */
     private ZonedDateTime getTargetDateTime(int counter) {
+        // Default target
         ZonedDateTime targetDateTime = getStart().plusMinutes(
                 counter * alarm.getFrequency().getMinutes()
         );
 
+        // Target after arrival
         if (targetDateTime.isEqual(travel.getArrival()) || targetDateTime.isAfter(travel.getArrival())) {
+            // Offset difference
             ZoneOffset currentOffset = targetDateTime.withZoneSameLocal(travel.getDeparture().getZone()).getOffset();
             ZoneOffset newOffset = targetDateTime.withZoneSameLocal(travel.getArrival().getZone()).getOffset();
+
             int difference = currentOffset.compareTo(newOffset) / 60;
-            boolean change = (abs(difference) > alarm.getFrequency().getMinutes() / 2);
+
+            // True if the difference is greater than half of the alarm frequency.
+            boolean change = abs(difference) > alarm.getFrequency().getMinutes() / 2;
 
             if (change) {
+                // Correct the alarm to the closest previous alarm
                 int changeValue = alarm.getFrequency().getMinutes() - abs(difference);
                 changeValue = (difference < 0 ? -changeValue : changeValue);
 
@@ -67,30 +117,37 @@ class Algorithm {
                         .withZoneSameInstant(travel.getArrival().getZone())
                         .plusMinutes(changeValue);
             } else {
-                targetDateTime = targetDateTime
-                        .withZoneSameLocal(travel.getArrival().getZone());
+                // Change only the time
+                targetDateTime = targetDateTime.withZoneSameLocal(travel.getArrival().getZone());
             }
-
         }
 
         return targetDateTime;
     }
 
+    /**
+     * Get the zone-id by a date-time, calculated with the travel.
+     *
+     * @param dateTime date-time for calculating zone-id
+     * @return zone-id belonging to date-time
+     */
     private ZoneId getZoneId(ZonedDateTime dateTime) {
-        // ZoneId prevZoneId = alarm.getStart().getZone();
         ZoneId prevZoneId = travel.getDeparture().getZone();
 
-        //for (Travel travel : travels) {
-            if (dateTime.isEqual(travel.getArrival())
-                    || dateTime.isAfter(travel.getArrival())) {
-                prevZoneId = travel.getArrival().getZone();
-            }
-        //}
+        if (dateTime.isEqual(travel.getArrival())
+                || dateTime.isAfter(travel.getArrival())) {
+            prevZoneId = travel.getArrival().getZone();
+        }
 
         return prevZoneId;
     }
 
-    public Path execute() {
+    /**
+     * Start algorithm.
+     *
+     * @return path with lowest cost.
+     */
+    Path execute() {
         // Start algorithm
         addPaths(0, new Path());
 
@@ -101,110 +158,87 @@ class Algorithm {
         return null;
     }
 
+    /**
+     * Check if the date-time is possible.
+     *
+     * @param dateTime date-time to be checked
+     * @return true if possible, false otherwise
+     */
     private boolean isPossible(ZonedDateTime dateTime) {
         return (dateTime.getHour() >= 8 && dateTime.getHour() <= 22);
     }
 
-    private void addPaths(int counter, Path path) {
-        ZonedDateTime prevTargetDateTime = getTargetDateTime(counter - 1);
-        ZonedDateTime targetDateTime = getTargetDateTime(counter);
-
-        // Default margins
-        boolean extra = false;
-        long minMargin = -alarm.getMargin();
-        long maxMargin = alarm.getMargin();
-
-        boolean extra2 = false;
-
-        // After arrival, go to target date-time
-        if (prevTargetDateTime.isAfter(travel.getArrival())) {
-            // Difference between ... and ...
-            long difference = difference(prevTargetDateTime, path.getLastIntake().getDate());
-
-            extra = true;
-            extra2 = true;
-
-            if (difference > 0) {
-                maxMargin = -60;
-
-                // abs(-240) > 120 = 240 > 120
-                // -120
-                if (abs(minMargin) > difference) {
-                    minMargin = -difference;
-                }
-            } else {
-                minMargin = 60;
-
-                // 240 > abs(-120) = 240 > 120
-                if (maxMargin > abs(difference)) {
-                    maxMargin = -difference;
-                }
-            }
-        }
-
+    /**
+     * Calculate the margins from minimal and maximal margin.
+     *
+     * @param minMargin minimal margin
+     * @param maxMargin maximal margin
+     * @return all margins
+     */
+    private List<Long> getMargins(long minMargin, long maxMargin) {
         List<Long> margins = new ArrayList<>();
 
         for (long i = minMargin; i <= maxMargin; i += 60) {
             margins.add(i);
         }
 
-        if (!prevTargetDateTime.getZone().equals(targetDateTime.getZone())) {
-            //extra = true;
-        }
+        return margins;
+    }
 
-        if (extra) {
-            if (extra2) {
-                if (!margins.contains(0)) {
-                    margins.add(0L);
+    /**
+     * Calculates cost for intake.
+     *
+     * @param intake intake
+     * @param target target date-time
+     * @return cost for intake
+     */
+    private long getCost(Intake intake, ZonedDateTime target) {
+        double daysDeparture = Math.abs((double)Duration.between(intake.getDate(), travel.getDeparture()).toHours() / 24);
+        double daysArrival = Math.abs((double)Duration.between(intake.getDate(), travel.getArrival()).toHours() / 24);
+
+        double days = Math.min(daysDeparture, daysArrival);
+        long minutes = abs(Duration.between(target, intake.getDate()).toMinutes());
+
+        return round(minutes + (minutes * days));
+    }
+
+    /**
+     * Generate new paths of a previous path.
+     *
+     * @param counter moments after start
+     * @param path previous path
+     */
+    private void addPaths(int counter, Path path) {
+        // Targets of new and previous moments
+        ZonedDateTime prevTargetDateTime = getTargetDateTime(counter - 1);
+        ZonedDateTime targetDateTime = getTargetDateTime(counter);
+
+        // Default margins
+        long minMargin = -alarm.getMargin();
+        long maxMargin = alarm.getMargin();
+
+        // After arrival, go to target date-time (only use margins that get us closer to the target date-time)
+        if (prevTargetDateTime.isAfter(travel.getArrival())) {
+            // Difference between previous target and last target
+            long difference = Duration.between(prevTargetDateTime, path.getLastIntake().getDate()).toMinutes();
+
+            // Set new margins
+            if (difference > 0) {
+                maxMargin = -60;
+
+                if (abs(minMargin) > difference) {
+                    minMargin = -difference;
+                }
+            } else {
+                minMargin = 60;
+
+                if (maxMargin > abs(difference)) {
+                    maxMargin = -difference;
                 }
             }
-
-            long difference = difference(prevTargetDateTime, path.getLastIntake().getDate());
-
-//            if (difference == 0) {
-//                difference = difference(path.getLastIntake().getDate().plusMinutes(alarm.getFrequency().getMinutes()), targetDateTime);
-//            }
-
-            // Controleer overdosis tijd
-            if (abs(difference) <= alarm.getFrequency().getMinutes() / 2) {
-                long insertValue = -difference;
-
-                if (insertValue < alarm.getMargin()) {
-                    if (!margins.contains(insertValue)) {
-                        margins.add(insertValue);
-                    }
-                }
-            }
         }
 
-//        boolean stop = false;
-//        if (!path.getIntakes().isEmpty()) {
-//            if (path.getLastIntake().getDate().equals(
-//                    ZonedDateTime.parse("2017-05-20T08:00+02:00[Europe/Amsterdam]")))
-//            {
-//                System.out.println(path);
-//                System.out.println(margins);
-//                System.out.println(extra);
-//
-//                ZonedDateTime test = path.getLastIntake().getDate()
-//                        .plusMinutes(alarm.getFrequency().getMinutes() - 540);
-//
-//                System.out.println(test);
-//
-//                stop = true;
-//                exit(1);
-//            }
-//        }
-
-//        if (extra2) {
-//            System.out.println(margins);
-//
-//            exit(1);
-//        }
-
-        for (long i : margins) {
-            count++;
-
+        for (long i : getMargins(minMargin, maxMargin)) {
             // Previous intake
             ZonedDateTime start = (
                     path.getIntakes().isEmpty() ?
@@ -214,23 +248,8 @@ class Algorithm {
             );
 
             // Create new intake
-            Intake newIntake = new Intake(
-                    start.plusMinutes(i)
-            );
-            newIntake.setDate(
-                    newIntake.getDate().withZoneSameInstant(getZoneId(newIntake.getDate()))
-            );
-
-//            if (stop && i == -540) {
-//                System.out.println(path.getLastIntake());
-//                System.out.println(newIntake);
-//                System.out.println(getZoneId(newIntake.getDate()));
-//                System.out.println(newIntake.getDate().withZoneSameInstant(
-//                        ZoneId.of("America/Los_Angeles")
-//                ));
-//
-//                exit(1);
-//            }
+            Intake newIntake = new Intake(start.plusMinutes(i));
+            newIntake.setDate(newIntake.getDate().withZoneSameInstant(getZoneId(newIntake.getDate())));
 
             // Check intake
             if (checkIsPossible && !isPossible(newIntake.getDate())) {
@@ -238,12 +257,7 @@ class Algorithm {
             }
 
             // Calculate cost for new intake
-            double daysDeparture = Math.abs((double)Duration.between(newIntake.getDate(), travel.getDeparture()).toHours() / 24);
-            double daysArrival = Math.abs((double)Duration.between(newIntake.getDate(), travel.getArrival()).toHours() / 24);
-
-            double days = Math.min(daysDeparture, daysArrival);
-            long minutes = abs(Duration.between(targetDateTime, newIntake.getDate()).toMinutes());
-            long cost = round(minutes + (minutes * days));
+            long cost = getCost(newIntake, targetDateTime);
 
             // Create/copy path
             Path newPath = new Path();
@@ -253,8 +267,8 @@ class Algorithm {
             // Add new path
             newPath.addIntake(newIntake, cost);
 
-            // Done?
-            if (difference(targetDateTime, newIntake.getDate()) == 0
+            // If path is done
+            if (Duration.between(targetDateTime, newIntake.getDate()).toMinutes() == 0
                     &&
                     (newIntake.getDate().isEqual(travel.getArrival())
                             || newIntake.getDate().isAfter(travel.getArrival()))
@@ -264,6 +278,7 @@ class Algorithm {
                 continue;
             }
 
+            // Skip path if cost is to high
             if (newPath.getCost() >= maxCost) {
                 continue;
             }
@@ -271,9 +286,5 @@ class Algorithm {
             // Loop
             addPaths(counter + 1, newPath);
         }
-    }
-
-    public int getCount() {
-        return count;
     }
 }

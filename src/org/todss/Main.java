@@ -83,7 +83,7 @@ public class Main {
         );
 
         // Set travel
-        Travel travel = travels.get(0);
+        Travel travel = travels.get(3);
 
         // Start measure
         ZonedDateTime start = ZonedDateTime.now();
@@ -91,6 +91,10 @@ public class Main {
         // Execute algorithm
         Algorithm algorithm = new Algorithm(alarm, travel);
         Path result = algorithm.execute();
+
+        // End measure
+        ZonedDateTime end = ZonedDateTime.now();
+        Duration duration = Duration.between(start, end);
 
         //
         System.out.println("Departure: " + travel.getDeparture());
@@ -105,13 +109,8 @@ public class Main {
             writeIntakes(result.getIntakes());
         }
 
-        // End measure
-        ZonedDateTime end = ZonedDateTime.now();
-        Duration duration = Duration.between(start, end);
-
         //
         System.out.println();
-        System.out.println("Count: " + algorithm.getCount());
         System.out.println("Seconds: " + (double)duration.toMillis() / 1000);
     }
 
