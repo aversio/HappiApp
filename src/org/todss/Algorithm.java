@@ -11,10 +11,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import static java.lang.Math.max;
 import static java.lang.Math.round;
 import static java.lang.StrictMath.abs;
-import static java.lang.System.exit;
 
 class Algorithm {
     private Alarm alarm;
@@ -23,7 +21,6 @@ class Algorithm {
     private PriorityQueue<Path> completedPaths = new PriorityQueue<>(Comparator.comparingLong(Path::getCost));
 
     private int count;
-    private long maxMemory;
 
     private int maxCost = 700;
     private boolean checkIsPossible = true;
@@ -94,56 +91,14 @@ class Algorithm {
     }
 
     public Path execute() {
-        ZonedDateTime start = ZonedDateTime.now();
-        long beforeUsedMem = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-
-        // Calculate
+        // Start algorithm
         addPaths(0, new Path());
 
-        // TEMP RETURN
+        // Return first result
         if (!completedPaths.isEmpty())
             return completedPaths.poll();
 
         return null;
-
-        /*
-        // Console
-        System.out.println("Travel: \n" + travel);
-
-        if (completedPaths.isEmpty()) {
-            System.out.println("\nNo solution found.");
-        } else {
-            for (int i = 0; i < 3; i++) {
-                Path path = completedPaths.poll();
-
-                if (path == null)
-                    continue;
-
-                System.out.println("\n\n\n");
-
-                System.out.println("Cost: " + path.getCost());
-                writeIntakes(path.getIntakes());
-            }
-        }
-
-        long afterUsedMem = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-        ZonedDateTime end = ZonedDateTime.now();
-        Duration duration = Duration.between(start, end);
-
-        System.out.println();
-        System.out.println("Count: " + count);
-        System.out.println("Seconds: " + (double)duration.toMillis() / 1000);
-        System.out.println("Memory: " + humanReadableByteCount(afterUsedMem - beforeUsedMem, true));
-        System.out.println("Max memory: " + humanReadableByteCount(maxMemory, true));
-        */
-    }
-
-    private static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
     private boolean isPossible(ZonedDateTime dateTime) {
@@ -249,7 +204,6 @@ class Algorithm {
 
         for (long i : margins) {
             count++;
-            maxMemory = max(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory(), maxMemory);
 
             // Previous intake
             ZonedDateTime start = (
@@ -319,22 +273,7 @@ class Algorithm {
         }
     }
 
-    private void writeIntakes(List<Intake> intakes) {
-        Intake prevIntake = null;
-        for (int i = 0; i < intakes.size(); i++) {
-            Intake intake = intakes.get(i);
-
-            if (prevIntake != null) {
-                Duration difference = Duration.between(prevIntake.getDate(), intake.getDate());
-
-                System.out.println(
-                        String.format("\t+%s", difference.toHours())
-                );
-            }
-
-            System.out.println(String.format("[%d] %s", i, intake.getDate()));
-
-            prevIntake = intake;
-        }
+    public int getCount() {
+        return count;
     }
 }

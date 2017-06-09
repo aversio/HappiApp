@@ -1,10 +1,8 @@
 package org.todss;
 
-import org.todss.model.Alarm;
-import org.todss.model.Frequency;
-import org.todss.model.Path;
-import org.todss.model.Travel;
+import org.todss.model.*;
 
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -84,9 +82,55 @@ public class Main {
                 )
         );
 
-        Algorithm algorithm = new Algorithm(alarm, travels.get(0));
+        // Set travel
+        Travel travel = travels.get(0);
+
+        // Start measure
+        ZonedDateTime start = ZonedDateTime.now();
+
+        // Execute algorithm
+        Algorithm algorithm = new Algorithm(alarm, travel);
         Path result = algorithm.execute();
 
-        System.out.println(result);
+        //
+        System.out.println("Departure: " + travel.getDeparture());
+        System.out.println("Arrival: " + travel.getArrival());
+
+        if (result == null) {
+            System.out.println("\nNo solution found.");
+        } else {
+            System.out.println();
+            System.out.println("Cost: " + result.getCost());
+            System.out.println();
+            writeIntakes(result.getIntakes());
+        }
+
+        // End measure
+        ZonedDateTime end = ZonedDateTime.now();
+        Duration duration = Duration.between(start, end);
+
+        //
+        System.out.println();
+        System.out.println("Count: " + algorithm.getCount());
+        System.out.println("Seconds: " + (double)duration.toMillis() / 1000);
+    }
+
+    private static void writeIntakes(List<Intake> intakes) {
+        Intake prevIntake = null;
+        for (int i = 0; i < intakes.size(); i++) {
+            Intake intake = intakes.get(i);
+
+            if (prevIntake != null) {
+                Duration difference = Duration.between(prevIntake.getDate(), intake.getDate());
+
+                System.out.println(
+                        String.format("\t+%s", difference.toHours())
+                );
+            }
+
+            System.out.println(String.format("[%d] %s", i, intake.getDate()));
+
+            prevIntake = intake;
+        }
     }
 }

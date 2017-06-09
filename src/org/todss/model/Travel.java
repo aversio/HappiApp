@@ -1,6 +1,5 @@
 package org.todss.model;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class Travel {
@@ -31,8 +30,8 @@ public class Travel {
     @Override
     public String toString() {
         return "Travel{" +
-                "\ndeparture=" + departure +
-                "\n, arrival=" + arrival +
+                "departure=" + departure +
+                ", arrival=" + arrival +
                 '}';
     }
 }

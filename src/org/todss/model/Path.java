@@ -36,8 +36,8 @@ public class Path {
     @Override
     public String toString() {
         return "Path{" +
-                "intakes=\n" + intakes +
-                "\n, cost=" + cost +
+                "intakes=" + intakes +
+                ", cost=" + cost +
                 '}';
     }
 }
