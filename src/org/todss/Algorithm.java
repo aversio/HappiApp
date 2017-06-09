@@ -48,9 +48,11 @@ class Algorithm {
      */
     private boolean checkIsPossible;
 
+    private int count = 0;
+
     {
-        checkIsPossible = true;
         maxCost = 700;
+        checkIsPossible = true;
     }
 
     /**
@@ -151,6 +153,9 @@ class Algorithm {
         // Start algorithm
         addPaths(0, new Path());
 
+        System.out.println("Count: " + count);
+        System.out.println();
+
         // Return first result
         if (!completedPaths.isEmpty())
             return completedPaths.poll();
@@ -239,6 +244,8 @@ class Algorithm {
         }
 
         for (long i : getMargins(minMargin, maxMargin)) {
+            count++;
+
             // Previous intake
             ZonedDateTime start = (
                     path.getIntakes().isEmpty() ?

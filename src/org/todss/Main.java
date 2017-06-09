@@ -83,7 +83,7 @@ public class Main {
         );
 
         // Set travel
-        Travel travel = travels.get(3);
+        Travel travel = travels.get(0);
 
         // Start measure
         ZonedDateTime start = ZonedDateTime.now();
