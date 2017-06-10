@@ -1,5 +1,6 @@
 package org.todss;
 
+import com.sun.org.apache.xpath.internal.SourceTree;
 import org.todss.model.Alarm;
 import org.todss.model.Intake;
 import org.todss.model.Path;
@@ -15,7 +16,9 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import static java.lang.Math.round;
+import static java.lang.Math.subtractExact;
 import static java.lang.StrictMath.abs;
+import static java.lang.System.exit;
 
 /**
  * Algorithm for an alarm with travels in mind.
@@ -38,6 +41,8 @@ class Algorithm {
      */
     private PriorityQueue<Path> completedPaths = new PriorityQueue<>(Comparator.comparingLong(Path::getCost));
 
+    private PriorityQueue<Path> paths = new PriorityQueue<>(Comparator.comparingLong(Path::getCost));
+
     /**
      * Setting for max cost of a path.
      */
@@ -51,7 +56,7 @@ class Algorithm {
     private int count = 0;
 
     {
-        maxCost = 700;
+        maxCost = 1400;
         checkIsPossible = true;
     }
 
@@ -214,6 +219,9 @@ class Algorithm {
      * @param path previous path
      */
     private void addPaths(int counter, Path path) {
+        // FIX
+        counter = path.getIntakes().size();
+
         // Targets of new and previous moments
         ZonedDateTime prevTargetDateTime = getTargetDateTime(counter - 1);
         ZonedDateTime targetDateTime = getTargetDateTime(counter);
@@ -242,6 +250,8 @@ class Algorithm {
                 }
             }
         }
+
+        List<Path> removeSameMarginPaths = new ArrayList<>();
 
         for (long i : getMargins(minMargin, maxMargin)) {
             count++;
@@ -273,6 +283,7 @@ class Algorithm {
 
             // Add new path
             newPath.addIntake(newIntake, cost);
+            newPath.addMargin(i);
 
             // If path is done
             if (Duration.between(targetDateTime, newIntake.getDate()).toMinutes() == 0
@@ -286,12 +297,35 @@ class Algorithm {
             }
 
             // Skip path if cost is to high
-            if (newPath.getCost() >= maxCost) {
+            if (newPath.getCost() > maxCost) {
                 continue;
             }
 
-            // Loop
-            addPaths(counter + 1, newPath);
+            paths.add(newPath);
+
+            List<Path> sameMarginPaths = new ArrayList<>();
+            for (Path testPath : paths) {
+                if (newPath.getTotalMargin() == testPath.getTotalMargin()
+                        //&& newPath.getLastIntake().equals(testPath.getLastIntake())
+                        && newPath.getIntakes().size() == testPath.getIntakes().size()
+                        ) {
+                    sameMarginPaths.add(testPath);
+                }
+            }
+
+            if (sameMarginPaths.size() > 1) {
+                sameMarginPaths.sort(Comparator.comparingLong(Path::getCost));
+
+                removeSameMarginPaths.addAll(
+                        sameMarginPaths.subList(1, sameMarginPaths.size())
+                );
+            }
+
+            paths.removeAll(removeSameMarginPaths);
+        }
+
+        if (!paths.isEmpty() && completedPaths.isEmpty()) {
+            addPaths(counter + 1, paths.poll());
         }
     }
 }

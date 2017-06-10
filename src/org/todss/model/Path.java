@@ -6,6 +6,7 @@ import java.util.List;
 public class Path {
     private List<Intake> intakes = new ArrayList<>();
     private long cost = 0;
+    private List<Long> margins = new ArrayList<>();
 
     public Path() {
     }
@@ -31,6 +32,20 @@ public class Path {
 
     public void setCost(long cost) {
         this.cost = cost;
+    }
+
+    public void addMargin(long margin) {
+        margins.add(margin);
+    }
+
+    public long getTotalMargin() {
+        int totalMargin = 0;
+
+        for (long margin : margins) {
+            totalMargin += margin;
+        }
+
+        return totalMargin;
     }
 
     @Override
