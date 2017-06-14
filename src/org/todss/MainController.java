@@ -87,7 +87,6 @@ public class MainController implements Initializable {
 
 		departureTime.setText(departure.getHour() + ":" + departure.getMinute());
 		arrivalTime.setText(arrival.getHour() + ":" + arrival.getMinute());
-		generate(null, null);
 		//listView.getSelectionModel().select("Australia/West");
 		listView.getSelectionModel().select("America/Atka");
 	}
@@ -100,29 +99,6 @@ public class MainController implements Initializable {
 		ZoneId zone = ZoneId.of(listView.getSelectionModel().getSelectedItem());
 		ZonedDateTime departure = ZonedDateTime.of(departurePicker.getValue().atTime(LocalTime.parse(departureTime.getText())), zone);
 		ZonedDateTime arrival = ZonedDateTime.of(arrivalPicker.getValue().atTime(LocalTime.parse(arrivalTime.getText())), zone);
-		generate(arrival, zone);
-	}
-
-	public void generate(ZonedDateTime from, ZoneId zoneId) {
-		List<ZonedDateTime> dates = ALARM.getScheme(7, null, from, zoneId);
-		for(int i = 1; i < OFFSET; i++) {
-			for (int i2 = 1; i2 < OFFSET; i2++) {
-				Node node = getNode(i, i2);
-				if (node != null) {
-					grid.getChildren().remove(node);
-				}
-			}
-		}
-		for(int i = 1; i < OFFSET; i++) {
-			for(int i2 = 1; i2 < OFFSET; i2++) {
-				FlowPane pane = new FlowPane();
-				ZonedDateTime date = dates.get(i * 7 + i2 - OFFSET);
-				Label label = new Label(date.format(DateTimeFormatter.ofPattern("H:mm")) + "\n" + date.format(DateTimeFormatter.ofPattern("dd-MM")));
-				pane.getChildren().add(label);
-				grid.add(pane, i2, i);
-				pane.setUserData("Object[row=" + i + ", column=" + i2 + "]");
-			}
-		}
 	}
 
 	private FlowPane getNode(int row, int column) {

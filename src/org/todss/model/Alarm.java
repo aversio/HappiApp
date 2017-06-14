@@ -1,88 +1,86 @@
 package org.todss.model;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
+/**
+ * A class representing an alarm used to remind you.
+ * @author Displee
+ */
 public class Alarm {
 
+	/**
+	 * The default properties.
+	 */
+	private static final Properties DEFAULT_PROPERTIES = new Properties();
+
+	static {
+		DEFAULT_PROPERTIES.put("sleeping", false);
+	}
+
+	/**
+	 * The frequency.
+	 */
     private Frequency frequency;
 
-    private ZonedDateTime start;
+	/**
+	 * The start of this alarm.
+	 */
+	private ZonedDateTime start;
 
-    private Properties properties = new Properties();
+	/**
+	 * The properties of this alarm.
+	 */
+    private Properties properties = new Properties(DEFAULT_PROPERTIES);
 
-    public Alarm(Frequency frequency, ZonedDateTime start) {
+	/**
+	 * Construct a new {@code Alarm} {@code Object}.
+	 * @param frequency The frequency.
+	 * @param start The start date.
+	 */
+	public Alarm(Frequency frequency, ZonedDateTime start) {
         this.frequency = frequency;
         this.start = start;
-        properties.put("sleeping", false);
     }
 
-    public Object getProperty(String key) {
+	/**
+	 * Get a property from this alarm.
+	 * @param key The key of the property to get.
+	 * @return The value of the property.
+	 */
+	public Object getProperty(String key) {
     	return properties.get(key);
 	}
 
-	public List<ZonedDateTime> getScheme(int weeks) {
-    	return getScheme(weeks, null, null, null);
-	}
-
-    public List<ZonedDateTime> getScheme(int weeks, ZonedDateTime start, ZonedDateTime from, ZoneId zoneId) {
-    	if (start == null) {
-    		start = this.start;
-		}
-    	List<ZonedDateTime> list = new ArrayList<>();
-    	int days = weeks * 7;
-		boolean updated = false;
-    	for(int i = 1; i <= days; i++) {
-			ZonedDateTime date = start.plusDays(i);
-    		if (from != null && date.compareTo(from) == 1) {
-    			if (!updated) {
-					updated = true;
-					ZonedDateTime newDate = date.withZoneSameInstant(zoneId);
-					int difference = newDate.getHour() - date.getHour();
-					int margin = frequency.getMargin();
-					if (difference < -margin || difference > margin) {
-						int daysBefore = (int) Math.ceil((double) (difference < 0 ? -difference : difference) / frequency.getMargin());
-						int completedDifference = 0;
-						int counter = daysBefore;
-						System.out.println("Difference=" + difference + ", dagen om af te bakenen=" + daysBefore);
-						while (completedDifference < difference) {
-							int left = difference - completedDifference;
-							if (left > margin) {
-								left = margin;
-							}
-							int index = (i - 1) - counter;
-							ZonedDateTime previousDay = list.get(index);
-							list.set(index, previousDay.minusHours(left));
-							System.out.println(previousDay + " min " + left + " uur.");
-							completedDifference += left;
-							counter--;
-						}
-					}
-				}
-				date = date.withZoneSameLocal(zoneId);
-			}
-    		list.add(date);
-		}
-    	return list;
-	}
-
+	/**
+	 * Get the frequency.
+	 * @return {@code frequency}
+	 */
     public Frequency getFrequency() {
         return frequency;
     }
 
-    public void setFrequency(Frequency frequency) {
+	/**
+	 * Set a new frequency for this alarm.
+	 * @param frequency The new frequency to set.
+	 */
+	public void setFrequency(Frequency frequency) {
         this.frequency = frequency;
     }
 
+	/**
+	 * Get the start date.
+	 * @return {@code start}
+	 */
     public ZonedDateTime getStart() {
         return start;
     }
 
-    public void setStart(ZonedDateTime start) {
+	/**
+	 * Set a new start date for this frequency.
+	 * @param start The new start date to set.
+	 */
+	public void setStart(ZonedDateTime start) {
         this.start = start;
     }
 
