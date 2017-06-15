@@ -39,11 +39,10 @@ public class SmartAlgorithm {
 		return dates;
 	}
 
-	public static void run(AlgorithmContext context) {
-		final long start = System.currentTimeMillis();
+	public static List<IntakeMoment> run(AlgorithmContext context) {
 		final ZonedDateTime[] range = getRange(context.getTravels());
 		if (range == null) {
-			return;
+			return null;
 		}
 		final long daysLength = Duration.between(range[0], range[1]).toDays();
 		final Frequency frequency = context.getAlarm().getFrequency();
@@ -94,9 +93,8 @@ public class SmartAlgorithm {
 			}
 			list.set(i, new IntakeMoment(current));
 		}
-		context.setIntakes(list);
 		writeIntakes(list);
-		System.out.println("Took " + (System.currentTimeMillis() - start) + " ms.");
+		return list;
 	}
 
 	/**

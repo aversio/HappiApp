@@ -5,6 +5,7 @@ import org.todss.algorithm.AlgorithmContext;
 import org.todss.algorithm.SmartAlgorithm;
 import org.todss.model.Alarm;
 import org.todss.model.Frequency;
+import org.todss.model.IntakeMoment;
 import org.todss.model.Travel;
 
 import java.time.ZoneId;
@@ -26,18 +27,32 @@ public class AlgorithmTest {
 	/**
 	 * Finally, test our algorithm.
 	 * @param travels The travels.
+	 * @return A list of intake moments.
 	 */
-	public void test(List<Travel> travels) {
-		test(travels, ALARM);
+	public List<IntakeMoment> test(List<Travel> travels) {
+		return test(travels, ALARM);
 	}
 
 	/**
 	 * Finally, test our algorithm.
 	 * @param travels The travels.
 	 * @param alarm The alarm.
+	 * @return A list of intake moments.
 	 */
-	public void test(List<Travel> travels, Alarm alarm) {
-		SmartAlgorithm.run(new AlgorithmContext(travels, alarm));
+	public List<IntakeMoment> test(List<Travel> travels, Alarm alarm) {
+		return test(new AlgorithmContext(travels, alarm));
+	}
+
+	/**
+	 * Finally, test our algorithm.
+	 * @param context The algorithm context.
+	 * @return A list of intake moments.
+	 */
+	public List<IntakeMoment> test(AlgorithmContext context) {
+		final long start = System.currentTimeMillis();
+		final List<IntakeMoment> list = SmartAlgorithm.run(context);
+		System.out.println("Took " + (System.currentTimeMillis() - start) + " ms.");
+		return list;
 	}
 
 	/**
@@ -68,7 +83,8 @@ public class AlgorithmTest {
 				ZonedDateTime.parse("2017-06-30T09:15+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
 		);
 		travels.add(returnTrip);
-		test(travels);
+		final List<IntakeMoment> intakes = test(travels);
+
 	}
 
 }

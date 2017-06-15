@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
@@ -28,7 +29,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
                <children>
                   <Label text="Maandag" />
                </children>
@@ -37,62 +38,69 @@
                   <String fx:value="test" />
                </styleClass>
             </FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="2">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="2">
                <children>
                   <Label text="Dinsdag" />
                </children>
             </FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="3">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="3">
                <children>
                   <Label text="Woensdag" />
                </children>
             </FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="4">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="4">
                <children>
                   <Label text="Donderdag" />
                </children>
             </FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="5">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="5">
                <children>
                   <Label text="Vrijdag" />
                </children>
             </FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="6">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="6">
                <children>
                   <Label text="Zaterdag" />
                </children>
             </FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="7">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.columnIndex="7">
                <children>
                   <Label text="Zondag" />
                </children>
             </FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="0" />
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="1">
+            <FlowPane alignment="BOTTOM_RIGHT" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="0">
+               <children>
+                  <Label text="Maand">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+               </children></FlowPane>
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="1">
                <children>
                   <Label text="Week 1" />
                </children></FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="2">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="2">
                <children>
                   <Label text="Week 2" />
                </children></FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="3">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="3">
                <children>
                   <Label text="Week 3" />
                </children></FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="4">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="4">
                <children>
                   <Label text="Week 4" />
                </children></FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="5">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="5">
                <children>
                   <Label text="Week 5" />
                </children></FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="6">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="6">
                <children>
                   <Label text="Week 6" />
                </children></FlowPane>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="7">
+            <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="scheme_header" GridPane.rowIndex="7">
                <children>
                   <Label text="Week 7" />
                </children></FlowPane>
@@ -106,7 +114,8 @@
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Close" />
+                    <MenuItem mnemonicParsing="false" text="Settings" />
+                        <MenuItem mnemonicParsing="false" text="Close" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
@@ -122,22 +131,6 @@
               </menus>
             </MenuBar>
          </top>
-         <center>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <children>
-                  <DatePicker fx:id="departurePicker" layoutX="81.0" layoutY="14.0" />
-                  <Label layoutX="14.0" layoutY="18.0" text="Vertrek" />
-                  <Label layoutX="14.0" layoutY="53.0" text="Aankomst" />
-                  <DatePicker fx:id="arrivalPicker" layoutX="81.0" layoutY="49.0" />
-                  <CheckBox layoutX="574.0" layoutY="14.0" mnemonicParsing="false" text="NL tijd aanhouden" />
-                  <CheckBox layoutX="574.0" layoutY="36.0" mnemonicParsing="false" text="Optie 2" />
-                  <CheckBox layoutX="574.0" layoutY="58.0" mnemonicParsing="false" text="Optie 3" />
-                  <ListView fx:id="listView" layoutX="361.0" layoutY="14.0" prefHeight="60.0" prefWidth="196.0" />
-                  <TextField fx:id="departureTime" layoutX="264.0" layoutY="15.0" prefHeight="25.0" prefWidth="88.0" promptText="Time..." />
-                  <TextField fx:id="arrivalTime" layoutX="264.0" layoutY="48.0" prefHeight="25.0" prefWidth="88.0" promptText="Time..." />
-               </children>
-            </AnchorPane>
-         </center>
       </BorderPane>
    </top>
 </BorderPane>
