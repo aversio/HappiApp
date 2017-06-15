@@ -1,7 +1,8 @@
 package org.todss.model;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Travel {
 
@@ -9,10 +10,16 @@ public class Travel {
 
     private ZonedDateTime arrival;
 
+    private List<Travel> changes = new ArrayList<>();
+
     public Travel(ZonedDateTime departure, ZonedDateTime arrival) {
         this.departure = departure;
         this.arrival = arrival;
     }
+
+    public void addChange(Travel travel) {
+    	changes.add(travel);
+	}
 
     public ZonedDateTime getDeparture() {
         return departure;

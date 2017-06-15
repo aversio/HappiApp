@@ -137,7 +137,7 @@ public class PathUtilities {
 			final int step = path.getSteps()[0];
 			if (step < 0) {
 				next = next.plusHours(step);
-				if (next.getHour() < arrival.getHour()) {
+				if (next.getHour() > arrival.getHour()) {
 					result.add(path);
 				}
 			} else {

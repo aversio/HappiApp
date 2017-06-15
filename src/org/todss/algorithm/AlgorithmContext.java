@@ -15,17 +15,27 @@ public class AlgorithmContext {
 	/**
 	 * The alarm.
 	 */
-	private Alarm alarm;
+	private final Alarm alarm;
 
 	/**
 	 * A list of travels.
 	 */
-	private List<Travel> travels;
+	private final List<Travel> travels;
 
 	/**
 	 * A list of intake moments.
 	 */
 	private List<IntakeMoment> intakes;
+
+	/**
+	 * Construct a new {@code AlgorithmContext} {@code Object}.
+	 * @param travels The travels.
+	 * @param alarm The alarm.
+	 */
+	public AlgorithmContext(List<Travel> travels, Alarm alarm) {
+		this.travels = travels;
+		this.alarm = alarm;
+	}
 
 	/**
 	 * Get the travels.
@@ -36,27 +46,11 @@ public class AlgorithmContext {
 	}
 
 	/**
-	 * Set the travels for this context.
-	 * @param travels The new list of travels to set.
-	 */
-	public void setTravels(List<Travel> travels) {
-		this.travels = travels;
-	}
-
-	/**
 	 * Get the alarm.
 	 * @return {@code alarm}
 	 */
 	public Alarm getAlarm() {
 		return alarm;
-	}
-
-	/**
-	 * Set a new alarm for this context.
-	 * @param alarm The new alarm to set.
-	 */
-	public void setAlarm(Alarm alarm) {
-		this.alarm = alarm;
 	}
 
 	/**

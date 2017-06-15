@@ -35,7 +35,7 @@ public class SmartAlgorithm {
 			return null;
 		}
 		dates[0] = start.minusDays(3).withMinute(0);
-		dates[1] = end.plusDays(5).withMinute(0);
+		dates[1] = end.plusDays(4).withMinute(0);
 		return dates;
 	}
 
@@ -80,6 +80,7 @@ public class SmartAlgorithm {
 								i += overflow;
 								currentZone = arrival.getZone();//TODO Fix deze?
 							}
+							currentZone = arrival.getZone();//TODO Fix deze?
 							continue outer;
 						}
 					} else {
@@ -169,7 +170,7 @@ public class SmartAlgorithm {
 
 	private static int demarcate(ZonedDateTime current, ZonedDateTime arrival, int difference, Frequency frequency, int index, List<IntakeMoment> list, boolean after) {
 		final int min = (int) Math.ceil(difference / (double) (difference < 0 ? -frequency.getMargin() : frequency.getMargin()));
-		ZonedDateTime previous = after ? current : getNextIntakeDate(current, frequency);
+		ZonedDateTime previous = getNextIntakeDate(current, frequency);
 		if (difference < 0) {
 			previous = previous.minusHours(difference);
 		} else {
@@ -177,12 +178,12 @@ public class SmartAlgorithm {
 		}
 		final int start = previous.getHour();
 		List<Path> availablePaths = PathUtilities.findPathsAfterArrival(min, difference, previous, arrival, frequency);
-		if (availablePaths.size() == 0) {
+		if (min != MAX_INTAKE_MOMENTS && availablePaths.size() == 0) {
 			availablePaths = PathUtilities.findPathsAfterArrival(MAX_INTAKE_MOMENTS, difference, previous, arrival, frequency);
 		}
 		PathUtilities.setCosts(availablePaths, previous, arrival, frequency);
 		final Path path = PathUtilities.getShortestPath(availablePaths);
-		System.out.println("Demarcate[after=" + after + ", difference=" + difference + ", min_intake_moments=" + min + ", arrival=" + arrival.getHour() + ", start=" + start + ", paths=" + availablePaths.size() + ", path=" + Arrays.toString(path.getSteps()) + "]");
+		System.out.println("Demarcate[after=" + after + ", possibilities=" + availablePaths.size() + ", difference=" + difference + ", min_intake_moments=" + min + ", arrival=" + arrival.getHour() + ", start=" + start + ", paths=" + availablePaths.size() + ", path=" + path + "]");
 		for(int i = 0; i < path.getSteps().length; i++) {
 			final int step = path.getSteps()[i];
 			if (i != 0 || !after) {
@@ -198,7 +199,7 @@ public class SmartAlgorithm {
 				previous = previous.minusHours(step);
 			}
 			//System.out.println("Previous_second=" + previous + ", step=" + step);
-			list.set(after ? (index + i) : (index - i), new IntakeMoment(previous));
+			list.set(after ? (index + i + 1) : (index - i), new IntakeMoment(previous));
 		}
 		return min;
 	}
