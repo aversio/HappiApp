@@ -14,6 +14,9 @@ import java.util.List;
 
 public class SmartAlgorithm {
 
+	/**
+	 * The maximum intake moment we can move/shift/demarcate.
+	 */
 	public static int MAX_INTAKE_MOMENTS = 3;
 
 	public static ZonedDateTime[] getRange(List<Travel> travels) {
@@ -32,7 +35,7 @@ public class SmartAlgorithm {
 			return null;
 		}
 		dates[0] = start.minusDays(3).withMinute(0);
-		dates[1] = end.plusDays(4).withMinute(0);
+		dates[1] = end.plusDays(5).withMinute(0);
 		return dates;
 	}
 
@@ -60,10 +63,10 @@ public class SmartAlgorithm {
 					final int difference = calculateDifference(departure, arrival);
 					final int margin = frequency.getMargin();
 					if (difference < -margin || difference > margin) {
-						//tijdsverschil is te groot, dus afbakenen of extra pil
+						//Time difference is too big, so demarcate or plan an extra intake moment
 						final int maxHours = frequency.getHours() / 2;
 						if ((difference <= -maxHours || difference >= maxHours) || forceExtraIntake(context.getAlarm())) {
-							//TODO Extra pil.
+							//TODO Extra intake moment.
 						} else {
 							//Afbakenen
 							ZonedDateTime temp = current.minusHours(difference);
@@ -75,15 +78,14 @@ public class SmartAlgorithm {
 							final int overflow = demarcate(current, arrival, difference, frequency, i, list, afterwards);
 							if (afterwards) {
 								i += overflow;
-								currentZone = arrival.getZone();//TODO Fix deze
+								currentZone = arrival.getZone();//TODO Fix deze?
 							}
 							continue outer;
 						}
 					} else {
-						//tijdsverschil valt binnen de marge
+						//Time difference is within the margin
 						current = current.minusHours(difference);
 					}
-					System.out.println("Traveling, difference=" + difference);
 				} else if (current.getYear() == arrival.getYear() && current.getDayOfYear() == arrival.getDayOfYear()) {
 					currentZone = arrival.getZone();
 					current = current.withZoneSameLocal(currentZone);
@@ -96,10 +98,31 @@ public class SmartAlgorithm {
 		System.out.println("Took " + (System.currentTimeMillis() - start) + " ms.");
 	}
 
+	/**
+	 * Get the next intake date.
+	 * @param current The start date.
+	 * @param frequency The frequency.
+	 * @return The next intake date.
+	 */
 	public static ZonedDateTime getNextIntakeDate(ZonedDateTime current, Frequency frequency) {
 		return getNextIntakeDate(current, frequency, 1);
 	}
 
+	/**
+	 * Get the next default intake date, based on the frequency and the amount of intakes to pass or to go back.
+	 * @param current The start date.
+	 * @param frequency The frequency.
+	 * @param amount The amount of intakes to pass or to go back.
+	 * <pre>
+	 * {@code
+	 * getNextIntakeDate(date, frequency, 1); --> the next intake date
+	 * getNextIntakeDate(date, frequency, -1; --> the previous intake date
+	 * getNextIntakeDate(date, frequency, 2); --> the second next intake date
+	 * etc...
+	 * }
+	 * </pre>
+	 * @return The intake date.
+	 */
 	public static ZonedDateTime getNextIntakeDate(ZonedDateTime current, Frequency frequency, int amount) {
 		if (amount == 0) {
 			return current;
@@ -112,7 +135,7 @@ public class SmartAlgorithm {
 		if (!currentDST && dateDST) {
 			final int targetHour = (current.getHour() + hours) % 24;
 			//If the hour of the previous day is two, and we go to summer time, that means we can't do minus 1 hour
-			//because the first day in summer time 02:00 doesn't exist, it go's to 03:00
+			//because the first day in summer time 02:00 doesn't exist, it go's to 03:00, so we don't minus 1 hour
 			if (targetHour == 2) {
 				return date;
 			}
@@ -153,13 +176,12 @@ public class SmartAlgorithm {
 			previous = previous.plusHours(difference);
 		}
 		final int start = previous.getHour();
-		List<Path> paths = PathUtilities.findPossiblePaths(min, difference);
-		if (paths.size() == 0) {
-			paths = PathUtilities.findPossiblePaths(MAX_INTAKE_MOMENTS, difference);
+		List<Path> availablePaths = PathUtilities.findPathsAfterArrival(min, difference, previous, arrival, frequency);
+		if (availablePaths.size() == 0) {
+			availablePaths = PathUtilities.findPathsAfterArrival(MAX_INTAKE_MOMENTS, difference, previous, arrival, frequency);
 		}
-		PathUtilities.setCosts(paths, previous, arrival, frequency);
-		final List<Path> availablePaths = PathUtilities.findPathsAfterArrival(paths, previous, arrival, frequency);
-		final Path path = PathUtilities.getShortestPath(availablePaths.size() == 0 ? paths : availablePaths);
+		PathUtilities.setCosts(availablePaths, previous, arrival, frequency);
+		final Path path = PathUtilities.getShortestPath(availablePaths);
 		System.out.println("Demarcate[after=" + after + ", difference=" + difference + ", min_intake_moments=" + min + ", arrival=" + arrival.getHour() + ", start=" + start + ", paths=" + availablePaths.size() + ", path=" + Arrays.toString(path.getSteps()) + "]");
 		for(int i = 0; i < path.getSteps().length; i++) {
 			final int step = path.getSteps()[i];
@@ -169,12 +191,13 @@ public class SmartAlgorithm {
 			if (after) {
 				previous = previous.withZoneSameLocal(arrival.getZone());
 			}
+			//System.out.println("Previous_first=" + previous + ", step=" + step);
 			if (step < 0) {
 				previous = previous.plusHours(step);
 			} else {
 				previous = previous.minusHours(step);
 			}
-			System.out.println("Setting[index=" + (after ? (index + i) : (index - i)) + ", date=" + previous + "]");
+			//System.out.println("Previous_second=" + previous + ", step=" + step);
 			list.set(after ? (index + i) : (index - i), new IntakeMoment(previous));
 		}
 		return min;

@@ -6,6 +6,7 @@ import org.todss.model.Frequency;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,12 +41,13 @@ public class PathUtilities {
 	/**
 	 * Find all possible paths that sum the total {@code target} with a specific path length of {@code n}.
 	 * @param n The maximum length of the possible paths.
+	 * @param margin The margin used as minimum and maximum step.
 	 * @param target The target amount.
 	 * @return A list of possible paths.
 	 */
-	public static List<Path> findPossiblePaths(int n, int target) {
+	public static List<Path> findPossiblePaths(int n, int margin, int target) {
 		final List<Path> paths = new ArrayList<>();
-		final int[][] possibilities = findPossiblePaths(n, target, PATH_STEPS);
+		final int[][] possibilities = findPossiblePaths(n, target, -margin, margin, PATH_STEPS);
 		for(int[] possibility : possibilities) {
 			if (possibility != null) {
 				paths.add(new Path(possibility));
@@ -61,7 +63,7 @@ public class PathUtilities {
 	 * @param steps The steps
 	 * @return A 2D array of paths.
 	 */
-	private static int[][] findPossiblePaths(int n, int target, int... steps) {
+	private static int[][] findPossiblePaths(int n, int target, int min, int max, int... steps) {
 		int[] clonedInput = steps.clone();
 		int[][] result = new int[(int) Math.pow(steps.length, n)][];
 		int carry;
@@ -75,7 +77,10 @@ public class PathUtilities {
 			if (total == target) {
 				int[] possibility = new int[indices.length];
 				for (int i = 0; i < indices.length; i++) {
-					possibility[i] = clonedInput[indices[i]];
+					int step = clonedInput[indices[i]];
+					if (step >= min && step <= max) {
+						possibility[i] = step;
+					}
 				}
 				result[resultIndex++] = possibility;
 			}
@@ -97,7 +102,7 @@ public class PathUtilities {
 	}
 
 	/**
-	 * Set the costs of a list of paths based on the distance of two dates.
+	 * Set the costs for a list of paths based on the distance of two dates.
 	 * @param paths The paths.
 	 * @param start The start date.
 	 * @param arrival The arrival date.
@@ -124,15 +129,8 @@ public class PathUtilities {
 		}
 	}
 
-	/**
-	 * Find paths that are after the arrival date.
-	 * @param paths The paths to search in.
-	 * @param start The start date to search from.
-	 * @param arrival The arrival.
-	 * @param frequency The frequency.
-	 * @return A list of paths that are after the argued arrival date.
-	 */
-	public static List<Path> findPathsAfterArrival(List<Path> paths, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency) {
+	public static List<Path> findPathsAfterArrival(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency) {
+		final List<Path> paths = PathUtilities.findPossiblePaths(min, frequency.getMargin(), difference);
 		final List<Path> result = new ArrayList<>();
 		for(Path path : paths) {
 			ZonedDateTime next = SmartAlgorithm.getNextIntakeDate(start, frequency).withZoneSameLocal(arrival.getZone());
