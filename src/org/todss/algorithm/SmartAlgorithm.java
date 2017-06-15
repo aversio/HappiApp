@@ -9,7 +9,6 @@ import org.todss.model.Travel;
 
 import java.time.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SmartAlgorithm {
@@ -181,6 +180,10 @@ public class SmartAlgorithm {
 		}
 		PathUtilities.setCosts(availablePaths, previous, arrival, frequency);
 		final Path path = PathUtilities.getShortestPath(availablePaths);
+		if (path == null) {
+			System.err.println("No path could be found.");
+			return 0;
+		}
 		System.out.println("Demarcate[after=" + after + ", possibilities=" + availablePaths.size() + ", difference=" + difference + ", min_intake_moments=" + min + ", arrival=" + arrival.getHour() + ", start=" + start + ", paths=" + availablePaths.size() + ", path=" + path + "]");
 		for(int i = 0; i < path.getSteps().length; i++) {
 			final int step = path.getSteps()[i];

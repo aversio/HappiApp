@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.todss.algorithm.SmartAlgorithm.MAX_INTAKE_MOMENTS;
+
 /**
  * A class used to utilize the path system of this application.
  * @author Displee
@@ -146,6 +148,9 @@ public class PathUtilities {
 					result.add(path);
 				}
 			}
+		}
+		if (result.size() == 0 && min == MAX_INTAKE_MOMENTS) {
+			result.add(getShortestPath(paths));//TODO Fix this, shouldn't happen.
 		}
 		return result;
 	}
