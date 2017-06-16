@@ -6,10 +6,9 @@ import org.todss.model.Frequency;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static org.todss.algorithm.SmartAlgorithm.MAX_INTAKE_MOMENTS;
+import static org.todss.Constants.MAX_INTAKE_MOMENTS;
 
 /**
  * A class used to utilize the path system of this application.
@@ -133,24 +132,30 @@ public class PathUtilities {
 
 	public static List<Path> findPathsAfterArrival(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency) {
 		final List<Path> paths = PathUtilities.findPossiblePaths(min, frequency.getMargin(), difference);
+		PathUtilities.setCosts(paths, start, arrival, frequency);
 		final List<Path> result = new ArrayList<>();
+		Path mostReliable = null;
 		for(Path path : paths) {
 			ZonedDateTime next = SmartAlgorithm.getNextIntakeDate(start, frequency).withZoneSameLocal(arrival.getZone());
 			final int step = path.getSteps()[0];
 			if (step < 0) {
 				next = next.plusHours(step);
-				if (next.getHour() > arrival.getHour()) {
-					result.add(path);
+				if (mostReliable == null || mostReliable.getSteps()[0] < step) {
+					mostReliable = path;
 				}
 			} else {
 				next = next.minusHours(step);
-				if (next.getHour() > arrival.getHour()) {
-					result.add(path);
+				if (mostReliable == null || mostReliable.getSteps()[0] > step) {
+					mostReliable = path;
 				}
+			}
+			if (next.getHour() > arrival.getHour()) {
+				result.add(path);
 			}
 		}
 		if (result.size() == 0 && min == MAX_INTAKE_MOMENTS) {
-			result.add(getShortestPath(paths));//TODO Fix this, shouldn't happen.
+			result.add(mostReliable);//TODO Intake is while he's on it's trip, can we do this?.
+			//result.add(getShortestPath(paths));//TODO Check why the most reliable is not the shortest path.
 		}
 		return result;
 	}

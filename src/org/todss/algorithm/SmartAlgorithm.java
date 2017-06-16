@@ -11,12 +11,9 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SmartAlgorithm {
+import static org.todss.Constants.MAX_INTAKE_MOMENTS;
 
-	/**
-	 * The maximum intake moment we can move/shift/demarcate.
-	 */
-	public static int MAX_INTAKE_MOMENTS = 3;
+public class SmartAlgorithm {
 
 	public static ZonedDateTime[] getRange(List<Travel> travels) {
 		final ZonedDateTime[] dates = new ZonedDateTime[2];
@@ -165,8 +162,17 @@ public class SmartAlgorithm {
 		return false;
 	}
 
+	private static List<Path> findAvailablePaths(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency) {
+		List<Path> availablePaths = PathUtilities.findPathsAfterArrival(min, difference, start, arrival, frequency);
+		if (min != MAX_INTAKE_MOMENTS && availablePaths.size() == 0) {
+			availablePaths = PathUtilities.findPathsAfterArrival(MAX_INTAKE_MOMENTS, difference, start, arrival, frequency);
+		}
+		return availablePaths.size() == 0 ? null : availablePaths;
+	}
+
 	private static int demarcate(ZonedDateTime current, ZonedDateTime arrival, int difference, Frequency frequency, int index, List<IntakeMoment> list, boolean after) {
 		final int min = (int) Math.ceil(difference / (double) (difference < 0 ? -frequency.getMargin() : frequency.getMargin()));
+		System.out.println("Current=" + current);
 		ZonedDateTime previous = getNextIntakeDate(current, frequency);
 		if (difference < 0) {
 			previous = previous.minusHours(difference);
@@ -174,16 +180,13 @@ public class SmartAlgorithm {
 			previous = previous.plusHours(difference);
 		}
 		final int start = previous.getHour();
-		List<Path> availablePaths = PathUtilities.findPathsAfterArrival(min, difference, previous, arrival, frequency);
-		if (min != MAX_INTAKE_MOMENTS && availablePaths.size() == 0) {
-			availablePaths = PathUtilities.findPathsAfterArrival(MAX_INTAKE_MOMENTS, difference, previous, arrival, frequency);
-		}
-		PathUtilities.setCosts(availablePaths, previous, arrival, frequency);
-		final Path path = PathUtilities.getShortestPath(availablePaths);
-		if (path == null) {
+		final List<Path> availablePaths = findAvailablePaths(min, difference, previous, arrival, frequency);
+		if (availablePaths == null) {
 			System.err.println("No path could be found.");
 			return 0;
 		}
+		PathUtilities.setCosts(availablePaths, previous, arrival, frequency);
+		final Path path = PathUtilities.getShortestPath(availablePaths);
 		System.out.println("Demarcate[after=" + after + ", possibilities=" + availablePaths.size() + ", difference=" + difference + ", min_intake_moments=" + min + ", arrival=" + arrival.getHour() + ", start=" + start + ", paths=" + availablePaths.size() + ", path=" + path + "]");
 		for(int i = 0; i < path.getSteps().length; i++) {
 			final int step = path.getSteps()[i];
