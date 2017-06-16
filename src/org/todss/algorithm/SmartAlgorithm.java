@@ -73,14 +73,13 @@ public class SmartAlgorithm {
 							final int overflow = demarcate(current, arrival, difference, frequency, i, list, afterwards);
 							if (afterwards) {
 								i += overflow;
-								currentZone = arrival.getZone();//TODO Fix deze?
 							}
 							currentZone = arrival.getZone();//TODO Fix deze?
 							continue outer;
 						}
 					} else {
-						//Time difference is within the margin
-						current = current.minusHours(difference);
+						//Time difference is within the margin, so we do nothing.
+						currentZone = arrival.getZone();//TODO Fix deze?
 					}
 				} else if (current.getYear() == arrival.getYear() && current.getDayOfYear() == arrival.getDayOfYear()) {
 					currentZone = arrival.getZone();
@@ -172,7 +171,6 @@ public class SmartAlgorithm {
 
 	private static int demarcate(ZonedDateTime current, ZonedDateTime arrival, int difference, Frequency frequency, int index, List<IntakeMoment> list, boolean after) {
 		final int min = (int) Math.ceil(difference / (double) (difference < 0 ? -frequency.getMargin() : frequency.getMargin()));
-		System.out.println("Current=" + current);
 		ZonedDateTime previous = getNextIntakeDate(current, frequency);
 		if (difference < 0) {
 			previous = previous.minusHours(difference);
@@ -185,7 +183,6 @@ public class SmartAlgorithm {
 			System.err.println("No path could be found.");
 			return 0;
 		}
-		PathUtilities.setCosts(availablePaths, previous, arrival, frequency);
 		final Path path = PathUtilities.getShortestPath(availablePaths);
 		System.out.println("Demarcate[after=" + after + ", possibilities=" + availablePaths.size() + ", difference=" + difference + ", min_intake_moments=" + min + ", arrival=" + arrival.getHour() + ", start=" + start + ", paths=" + availablePaths.size() + ", path=" + path + "]");
 		for(int i = 0; i < path.getSteps().length; i++) {
