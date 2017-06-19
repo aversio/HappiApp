@@ -6,9 +6,9 @@ import org.todss.model.Frequency;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static org.todss.Constants.ENABLE_INTAKE_WHILE_TRAVELING;
 import static org.todss.Constants.MAX_INTAKE_MOMENTS;
 
 /**
@@ -48,15 +48,11 @@ public class PathUtilities {
 	 * @return A list of possible paths.
 	 */
 	public static List<Path> findPossiblePaths(int n, int margin, int target) {
-		final List<Path> paths = new ArrayList<>();
-		final int[][] possibilities = findPossiblePaths(n, target, -margin, margin, PATH_STEPS);
-		for(int[] possibility : possibilities) {
-			paths.add(new Path(possibility));
-		}
-		return paths;
+		return findPossiblePaths(n, target, -margin, margin, PATH_STEPS);
 	}
 
 	/**
+	 * //TODO Fix documnntation
 	 * Find all possible paths with {@code steps} that sum the {@code target} where the path must contain {@code n} steps.
 	 * A step must have a minimum size of {@code min} and can have a maximum size of {@code max}.
 	 * <pre>
@@ -73,12 +69,11 @@ public class PathUtilities {
 	 * @param steps The steps
 	 * @return A 2D array of paths.
 	 */
-	private static int[][] findPossiblePaths(int n, int target, int min, int max, int... steps) {
+	public static List<Path> findPossiblePaths(int n, int target, int min, int max, int... steps) {
 		int[] clonedInput = steps.clone();
-		int[][] result = new int[(int) Math.pow(steps.length, n)][];
+		final List<Path> result = new ArrayList<>();
 		int carry;
 		int[] indices = new int[n];
-		int resultIndex = 0;
 		do {
 			int total = 0;
 			for(int i : indices) {
@@ -90,9 +85,15 @@ public class PathUtilities {
 			if (total == target) {
 				int[] possibility = new int[indices.length];
 				for (int i = 0; i < indices.length; i++) {
-					possibility[i] = clonedInput[indices[i]];
+					final int step = clonedInput[indices[i]];
+					if (step >= min && step <= max) {
+						possibility[i] = step;
+					}
 				}
-				result[resultIndex++] = possibility;
+				final Path path = new Path(possibility);
+				if (!result.contains(path)) {
+					result.add(path);
+				}
 			}
 			carry = 1;
 			for (int i = indices.length - 1; i >= 0; i--) {
@@ -108,13 +109,7 @@ public class PathUtilities {
 			}
 		}
 		while (carry != 1);
-		final ArrayList<int[]> list = new ArrayList<>();
-		for(int[] set : result) {
-			if (set != null) {
-				list.add(set);
-			}
-		}
-		return list.toArray(new int[list.size()][]);
+		return result;
 	}
 
 	/**
@@ -124,33 +119,38 @@ public class PathUtilities {
 	 * @param arrival The arrival date.
 	 * @param frequency The frequency.
 	 */
-	public static void setCosts(List<Path> paths, ZonedDateTime start, ZonedDateTime arrival, int difference, Frequency frequency) {
+	public static void setCosts(int min, List<Path> paths, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency, boolean after) {
 		for(Path path : paths) {
 			//we create a copy here of start
-			ZonedDateTime temp = start.minusHours(0);
+			ZonedDateTime next = start.minusHours(0);
 			int cost = 0;
 			//we create a copy here of temp
-			final ZonedDateTime original = temp.minusHours(0).withZoneSameInstant(arrival.getZone());
+			final ZonedDateTime original;
+			if (after) {
+				original = next.withZoneSameInstant(arrival.getZone());
+			} else {
+				original = SmartAlgorithm.getNextIntakeDate(next, frequency, -min);
+			}
 			for(int i = 0; i < path.getSteps().length; i++) {
 				final int step = path.getSteps()[i];
-				temp = SmartAlgorithm.getNextIntakeDate(temp, frequency, difference < 0 ? -1 : 1);
+				if (i != 0 || !after) {
+					next = SmartAlgorithm.getNextIntakeDate(next, frequency, after ? 1 : -1);
+				}
 				if (step < 0) {
-					temp = temp.plusHours(step);
+					next = next.plusHours(step);
 				} else {
-					temp = temp.minusHours(step);
+					next = next.minusHours(step);
 				}
-				if (true) {
-					System.out.println("Checking[original=" + original + ", temp=" + temp + ", step=" + step + ", duration=" + Duration.between(original, temp) + "]");
-				}
-				cost += Duration.between(original, temp).toMinutes();
+				cost += Duration.between(original, next).toMinutes();
+				//System.out.println(original + ", " + next + ", " + step + ", " + duration + ", " + cost + ", " + path);
 			}
 			path.setCost(cost);
 		}
 	}
 
-	public static List<Path> findPathsAfterArrival(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency) {
+	public static List<Path> findPathsAfterArrival(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency, boolean after) {
 		final List<Path> paths = PathUtilities.findPossiblePaths(min, frequency.getMargin(), difference);
-		PathUtilities.setCosts(paths, start, arrival, difference, frequency);
+		PathUtilities.setCosts(min, paths, start, arrival, frequency, after);
 		final List<Path> result = new ArrayList<>();
 		for(Path path : paths) {
 			ZonedDateTime next = SmartAlgorithm.getNextIntakeDate(start, frequency).withZoneSameLocal(arrival.getZone());
@@ -164,7 +164,7 @@ public class PathUtilities {
 				result.add(path);
 			}
 		}
-		if (result.size() == 0 && min == MAX_INTAKE_MOMENTS) {
+		if (ENABLE_INTAKE_WHILE_TRAVELING && result.size() == 0 && min == MAX_INTAKE_MOMENTS) {
 			result.add(getShortestPath(paths));
 		}
 		return result;

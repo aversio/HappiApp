@@ -13,8 +13,17 @@ import java.util.List;
 
 import static org.todss.Constants.MAX_INTAKE_MOMENTS;
 
+/**
+ * A class representing our algorithm.
+ * @author Displee
+ */
 public class SmartAlgorithm {
 
+	/**
+	 * Get the date range in which we calculate the intake moments.
+	 * @param travels A list of travels.
+	 * @return An array with containing 2 values, the first index is the start date, the second one is the end date.
+	 */
 	public static ZonedDateTime[] getRange(List<Travel> travels) {
 		final ZonedDateTime[] dates = new ZonedDateTime[2];
 		ZonedDateTime start = null;
@@ -35,6 +44,11 @@ public class SmartAlgorithm {
 		return dates;
 	}
 
+	/**
+	 * Run this algorithm.
+	 * @param context The context.
+	 * @return A list of intake moments.
+	 */
 	public static List<IntakeMoment> run(AlgorithmContext context) {
 		final ZonedDateTime[] range = getRange(context.getTravels());
 		if (range == null) {
@@ -55,7 +69,7 @@ public class SmartAlgorithm {
 				final ZonedDateTime departure = travel.getDeparture();
 				final ZonedDateTime arrival = travel.getArrival();
 				if (current.getYear() == departure.getYear() && current.getDayOfYear() == departure.getDayOfYear()) {
-					final int difference = calculateDifference(departure, arrival);
+					final int difference = travel.getDifference();
 					final int margin = frequency.getMargin();
 					if (difference < -margin || difference > margin) {
 						//Time difference is too big, so demarcate or plan an extra intake moment
@@ -141,18 +155,6 @@ public class SmartAlgorithm {
 	}
 
 	/**
-	 * Calculate the hour difference of two zoned date time objects.
-	 * @param departure The departure date.
-	 * @param arrival The arrival date.
-	 * @return The difference in hours.
-	 */
-	private static int calculateDifference(ZonedDateTime departure, ZonedDateTime arrival) {
-		final int arrivalOffset = departure.getZone().getRules().getOffset(arrival.toLocalDateTime()).getTotalSeconds() / 3600;
-		final int departureOffset = arrival.getZone().getRules().getOffset(departure.toLocalDateTime()).getTotalSeconds() / 3600;
-		return departureOffset - arrivalOffset;
-	}
-
-	/**
 	 * Check if we have to force an extra intake moment.
 	 * @param alarm The alarm.
 	 * @return If we have to force an extra intake moment.
@@ -161,10 +163,26 @@ public class SmartAlgorithm {
 		return false;
 	}
 
-	private static List<Path> findAvailablePaths(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency) {
-		List<Path> availablePaths = PathUtilities.findPathsAfterArrival(min, difference, start, arrival, frequency);
-		if (min != MAX_INTAKE_MOMENTS && availablePaths.size() == 0) {
-			availablePaths = PathUtilities.findPathsAfterArrival(MAX_INTAKE_MOMENTS, difference, start, arrival, frequency);
+	/**
+	 * Find the available paths that can be taken after the arrival date.
+	 * @param min The minimum amount of intake moments.
+	 * @param difference The time difference.
+	 * @param start The start date.
+	 * @param arrival The arrival date we need to pass.
+	 * @param frequency The frequency.
+	 * @return A list of paths.
+	 */
+	private static List<Path> findAvailablePaths(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency, boolean after) {
+		if (min > MAX_INTAKE_MOMENTS) {
+			return null;
+		}
+		List<Path> availablePaths = PathUtilities.findPathsAfterArrival(min, difference, start, arrival, frequency, after);
+		while(min != MAX_INTAKE_MOMENTS) {
+			availablePaths = PathUtilities.findPathsAfterArrival(MAX_INTAKE_MOMENTS, difference, start, arrival, frequency, after);
+			if (availablePaths.size() != 0) {
+				break;
+			}
+			min++;
 		}
 		return availablePaths.size() == 0 ? null : availablePaths;
 	}
@@ -178,7 +196,7 @@ public class SmartAlgorithm {
 			previous = previous.plusHours(difference);
 		}
 		final int start = previous.getHour();
-		final List<Path> availablePaths = findAvailablePaths(min, difference, previous, arrival, frequency);
+		final List<Path> availablePaths = findAvailablePaths(min, difference, previous, arrival, frequency, after);
 		if (availablePaths == null) {
 			System.err.println("No path could be found.");
 			return 0;
@@ -202,9 +220,14 @@ public class SmartAlgorithm {
 			//System.out.println("Previous_second=" + previous + ", step=" + step);
 			list.set(after ? (index + i + 1) : (index - i), new IntakeMoment(previous));
 		}
-		return min;
+		System.out.println(path.getSteps().length);
+		return path.getSteps().length;
 	}
 
+	/**
+	 * Write a list of intake moments in a fancy format.
+	 * @param intakes The list of intakes to write.
+	 */
 	private static void writeIntakes(List<IntakeMoment> intakes) {
 		IntakeMoment prevIntake = null;
 		for (int i = 0; i < intakes.size(); i++) {

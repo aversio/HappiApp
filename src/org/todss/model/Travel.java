@@ -21,6 +21,16 @@ public class Travel {
     	changes.add(travel);
 	}
 
+	/**
+	 * Get the hour difference between the departure and the arrival date.
+	 * @return The difference in hours.
+	 */
+	public int getDifference() {
+		final int arrivalOffset = departure.getZone().getRules().getOffset(arrival.toLocalDateTime()).getTotalSeconds() / 3600;
+		final int departureOffset = arrival.getZone().getRules().getOffset(departure.toLocalDateTime()).getTotalSeconds() / 3600;
+		return departureOffset - arrivalOffset;
+	}
+
     public ZonedDateTime getDeparture() {
         return departure;
     }
