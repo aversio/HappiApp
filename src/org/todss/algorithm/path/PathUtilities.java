@@ -147,7 +147,7 @@ public class PathUtilities {
 		}
 	}
 
-	public static List<Path> findPathsAfterTargetDate(int min, int difference, ZonedDateTime start, ZonedDateTime targetDate, Frequency frequency, boolean after) {
+	public static List<Path> findPathsForTargetDate(int min, int difference, ZonedDateTime start, ZonedDateTime targetDate, Frequency frequency, boolean after) {
 		final List<Path> paths = PathUtilities.findPossiblePaths(min, frequency.getMargin(), difference);
 		PathUtilities.setCosts(min, paths, start, targetDate, frequency, after);
 		final List<Path> result = new ArrayList<>();

@@ -180,9 +180,9 @@ public class SmartAlgorithm {
 		if (min > MAX_INTAKE_MOMENTS) {
 			return null;
 		}
-		List<Path> availablePaths = PathUtilities.findPathsAfterTargetDate(min, difference, start, after ? arrival : departure, frequency, after);
+		List<Path> availablePaths = PathUtilities.findPathsForTargetDate(min, difference, start, after ? arrival : departure, frequency, after);
 		while(min != MAX_INTAKE_MOMENTS) {
-			availablePaths = PathUtilities.findPathsAfterTargetDate(MAX_INTAKE_MOMENTS, difference, start, after ? arrival : departure, frequency, after);
+			availablePaths = PathUtilities.findPathsForTargetDate(MAX_INTAKE_MOMENTS, difference, start, after ? arrival : departure, frequency, after);
 			if (availablePaths.size() != 0) {
 				break;
 			}
