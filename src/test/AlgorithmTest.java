@@ -3,17 +3,14 @@ package test;
 import org.junit.jupiter.api.Test;
 import org.todss.algorithm.AlgorithmContext;
 import org.todss.algorithm.SmartAlgorithm;
-import org.todss.algorithm.path.PathUtilities;
 import org.todss.model.Alarm;
 import org.todss.model.Frequency;
 import org.todss.model.IntakeMoment;
 import org.todss.model.Travel;
 
-import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

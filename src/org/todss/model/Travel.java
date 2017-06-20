@@ -21,6 +21,10 @@ public class Travel {
     	changes.add(travel);
 	}
 
+	public void addChange(ZonedDateTime departure, ZonedDateTime arrival) {
+    	changes.add(new Travel(departure, arrival));
+	}
+
 	/**
 	 * Get the hour difference between the departure and the arrival date.
 	 * @return The difference in hours.

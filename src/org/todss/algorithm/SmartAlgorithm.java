@@ -84,7 +84,7 @@ public class SmartAlgorithm {
 							if (afterwards) {
 								list.set(i, new IntakeMoment(current));
 							}
-							final int overflow = demarcate(current, arrival, difference, frequency, i, list, afterwards);
+							final int overflow = demarcate(current, departure, arrival, difference, frequency, i, list, afterwards);
 							if (afterwards) {
 								i += overflow;
 							}
@@ -114,6 +114,10 @@ public class SmartAlgorithm {
 	 */
 	public static ZonedDateTime getNextIntakeDate(ZonedDateTime current, Frequency frequency) {
 		return getNextIntakeDate(current, frequency, 1);
+	}
+
+	public static ZonedDateTime getNextIntakeDate(ZonedDateTime current, Frequency frequency, boolean after) {
+		return getNextIntakeDate(current, frequency, after ? 1 : -1);
 	}
 
 	/**
@@ -172,13 +176,13 @@ public class SmartAlgorithm {
 	 * @param frequency The frequency.
 	 * @return A list of paths.
 	 */
-	private static List<Path> findAvailablePaths(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency, boolean after) {
+	private static List<Path> findAvailablePaths(int min, int difference, ZonedDateTime start, ZonedDateTime departure, ZonedDateTime arrival, Frequency frequency, boolean after) {
 		if (min > MAX_INTAKE_MOMENTS) {
 			return null;
 		}
-		List<Path> availablePaths = PathUtilities.findPathsAfterArrival(min, difference, start, arrival, frequency, after);
+		List<Path> availablePaths = PathUtilities.findPathsAfterTargetDate(min, difference, start, after ? arrival : departure, frequency, after);
 		while(min != MAX_INTAKE_MOMENTS) {
-			availablePaths = PathUtilities.findPathsAfterArrival(MAX_INTAKE_MOMENTS, difference, start, arrival, frequency, after);
+			availablePaths = PathUtilities.findPathsAfterTargetDate(MAX_INTAKE_MOMENTS, difference, start, after ? arrival : departure, frequency, after);
 			if (availablePaths.size() != 0) {
 				break;
 			}
@@ -187,7 +191,7 @@ public class SmartAlgorithm {
 		return availablePaths.size() == 0 ? null : availablePaths;
 	}
 
-	private static int demarcate(ZonedDateTime current, ZonedDateTime arrival, int difference, Frequency frequency, int index, List<IntakeMoment> list, boolean after) {
+	private static int demarcate(ZonedDateTime current, ZonedDateTime departure, ZonedDateTime arrival, int difference, Frequency frequency, int index, List<IntakeMoment> list, boolean after) {
 		final int min = (int) Math.ceil(difference / (double) (difference < 0 ? -frequency.getMargin() : frequency.getMargin()));
 		ZonedDateTime previous = getNextIntakeDate(current, frequency);
 		if (difference < 0) {
@@ -196,7 +200,7 @@ public class SmartAlgorithm {
 			previous = previous.plusHours(difference);
 		}
 		final int start = previous.getHour();
-		final List<Path> availablePaths = findAvailablePaths(min, difference, previous, arrival, frequency, after);
+		final List<Path> availablePaths = findAvailablePaths(min, difference, previous, departure, arrival, frequency, after);
 		if (availablePaths == null) {
 			System.err.println("No path could be found.");
 			return 0;
@@ -206,21 +210,18 @@ public class SmartAlgorithm {
 		for(int i = 0; i < path.getSteps().length; i++) {
 			final int step = path.getSteps()[i];
 			if (i != 0 || !after) {
-				previous = getNextIntakeDate(previous, frequency, after ? 1 : -1);
+				previous = getNextIntakeDate(previous, frequency, after);
 			}
 			if (after) {
 				previous = previous.withZoneSameLocal(arrival.getZone());
 			}
-			//System.out.println("Previous_first=" + previous + ", step=" + step);
 			if (step < 0) {
 				previous = previous.plusHours(step);
 			} else {
 				previous = previous.minusHours(step);
 			}
-			//System.out.println("Previous_second=" + previous + ", step=" + step);
 			list.set(after ? (index + i + 1) : (index - i), new IntakeMoment(previous));
 		}
-		System.out.println(path.getSteps().length);
 		return path.getSteps().length;
 	}
 

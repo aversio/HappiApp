@@ -26,6 +26,14 @@ public class Path {
 		this.steps = steps;
 	}
 
+	/**
+	 * Get the last step.
+	 * @return The last step of this path.
+	 */
+	public int getLastStep() {
+		return steps[steps.length - 1];
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Path)) {

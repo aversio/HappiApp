@@ -83,7 +83,7 @@ public class PathUtilities {
 				}
 			}
 			if (total == target) {
-				int[] possibility = new int[indices.length];
+				final int[] possibility = new int[indices.length];
 				for (int i = 0; i < indices.length; i++) {
 					final int step = clonedInput[indices[i]];
 					if (step >= min && step <= max) {
@@ -142,26 +142,36 @@ public class PathUtilities {
 					next = next.minusHours(step);
 				}
 				cost += Duration.between(original, next).toMinutes();
-				//System.out.println(original + ", " + next + ", " + step + ", " + duration + ", " + cost + ", " + path);
 			}
 			path.setCost(cost);
 		}
 	}
 
-	public static List<Path> findPathsAfterArrival(int min, int difference, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency, boolean after) {
+	public static List<Path> findPathsAfterTargetDate(int min, int difference, ZonedDateTime start, ZonedDateTime targetDate, Frequency frequency, boolean after) {
 		final List<Path> paths = PathUtilities.findPossiblePaths(min, frequency.getMargin(), difference);
-		PathUtilities.setCosts(min, paths, start, arrival, frequency, after);
+		PathUtilities.setCosts(min, paths, start, targetDate, frequency, after);
 		final List<Path> result = new ArrayList<>();
 		for(Path path : paths) {
-			ZonedDateTime next = SmartAlgorithm.getNextIntakeDate(start, frequency).withZoneSameLocal(arrival.getZone());
-			final int step = path.getSteps()[0];
+			ZonedDateTime next = SmartAlgorithm.getNextIntakeDate(start, frequency, after).withZoneSameLocal(targetDate.getZone());
+			final int step;
+			if (after) {
+				step = path.getSteps()[0];
+			} else {
+				step = path.getLastStep();
+			}
 			if (step < 0) {
 				next = next.plusHours(step);
 			} else {
 				next = next.minusHours(step);
 			}
-			if (next.getHour() > arrival.getHour()) {
-				result.add(path);
+			if (after) {
+				if (next.getHour() > targetDate.getHour()) {
+					result.add(path);
+				}
+			} else {
+				if (next.isBefore(targetDate)) {
+					result.add(path);
+				}
 			}
 		}
 		if (ENABLE_INTAKE_WHILE_TRAVELING && result.size() == 0 && min == MAX_INTAKE_MOMENTS) {
