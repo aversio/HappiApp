@@ -24,7 +24,7 @@ public class SmartAlgorithm {
 	 * @param travels A list of travels.
 	 * @return An array with containing 2 values, the first index is the start date, the second one is the end date.
 	 */
-	public static ZonedDateTime[] getRange(List<Travel> travels) {
+	private static ZonedDateTime[] getRange(List<Travel> travels) {
 		final ZonedDateTime[] dates = new ZonedDateTime[2];
 		ZonedDateTime start = null;
 		ZonedDateTime end = null;
@@ -88,12 +88,12 @@ public class SmartAlgorithm {
 							if (afterwards) {
 								i += overflow;
 							}
-							currentZone = arrival.getZone();//TODO Fix deze?
+							currentZone = arrival.getZone();
 							continue outer;
 						}
 					} else {
 						//Time difference is within the margin, so we do nothing.
-						currentZone = arrival.getZone();//TODO Fix deze?
+						currentZone = arrival.getZone();
 					}
 				} else if (current.getYear() == arrival.getYear() && current.getDayOfYear() == arrival.getDayOfYear()) {
 					currentZone = arrival.getZone();
@@ -116,6 +116,13 @@ public class SmartAlgorithm {
 		return getNextIntakeDate(current, frequency, 1);
 	}
 
+	/**
+	 * Get the next intake date.
+	 * @param current The current date.
+	 * @param frequency The frequency.
+	 * @param after If we demarcate afterwards.
+	 * @return The next intake date.
+	 */
 	public static ZonedDateTime getNextIntakeDate(ZonedDateTime current, Frequency frequency, boolean after) {
 		return getNextIntakeDate(current, frequency, after ? 1 : -1);
 	}
@@ -125,6 +132,7 @@ public class SmartAlgorithm {
 	 * @param current The start date.
 	 * @param frequency The frequency.
 	 * @param amount The amount of intakes to pass or to go back.
+	 * Example:
 	 * <pre>
 	 * {@code
 	 * getNextIntakeDate(date, frequency, 1); --> the next intake date
@@ -169,30 +177,32 @@ public class SmartAlgorithm {
 
 	/**
 	 * Find the available paths that can be taken after the arrival date.
-	 * @param min The minimum amount of intake moments.
+	 * @param steps The minimum amount of steps.
 	 * @param difference The time difference.
 	 * @param start The start date.
-	 * @param arrival The arrival date we need to pass.
+	 * @param departure The departure date.
+	 * @param arrival The arrival date.
 	 * @param frequency The frequency.
+	 * @param after If we demarcate after the travel.
 	 * @return A list of paths.
 	 */
-	private static List<Path> findAvailablePaths(int min, int difference, ZonedDateTime start, ZonedDateTime departure, ZonedDateTime arrival, Frequency frequency, boolean after) {
-		if (min > MAX_INTAKE_MOMENTS) {
+	private static List<Path> findAvailablePaths(int steps, int difference, ZonedDateTime start, ZonedDateTime departure, ZonedDateTime arrival, Frequency frequency, boolean after) {
+		if (steps > MAX_INTAKE_MOMENTS) {
 			return null;
 		}
-		List<Path> availablePaths = PathUtilities.findPathsForTargetDate(min, difference, start, after ? arrival : departure, frequency, after);
-		while(min != MAX_INTAKE_MOMENTS) {
+		List<Path> availablePaths = PathUtilities.findPathsForTargetDate(steps, difference, start, after ? arrival : departure, frequency, after);
+		while(steps != MAX_INTAKE_MOMENTS) {
 			availablePaths = PathUtilities.findPathsForTargetDate(MAX_INTAKE_MOMENTS, difference, start, after ? arrival : departure, frequency, after);
 			if (availablePaths.size() != 0) {
 				break;
 			}
-			min++;
+			steps++;
 		}
 		return availablePaths.size() == 0 ? null : availablePaths;
 	}
 
 	private static int demarcate(ZonedDateTime current, ZonedDateTime departure, ZonedDateTime arrival, int difference, Frequency frequency, int index, List<IntakeMoment> list, boolean after) {
-		final int min = (int) Math.ceil(difference / (double) (difference < 0 ? -frequency.getMargin() : frequency.getMargin()));
+		final int steps = (int) Math.ceil(difference / (double) (difference < 0 ? -frequency.getMargin() : frequency.getMargin()));
 		ZonedDateTime previous = getNextIntakeDate(current, frequency);
 		if (difference < 0) {
 			previous = previous.minusHours(difference);
@@ -200,13 +210,13 @@ public class SmartAlgorithm {
 			previous = previous.plusHours(difference);
 		}
 		final int start = previous.getHour();
-		final List<Path> availablePaths = findAvailablePaths(min, difference, previous, departure, arrival, frequency, after);
+		final List<Path> availablePaths = findAvailablePaths(steps, difference, previous, departure, arrival, frequency, after);
 		if (availablePaths == null) {
 			System.err.println("No path could be found.");
 			return 0;
 		}
 		final Path path = PathUtilities.getShortestPath(availablePaths);
-		System.out.println("Demarcate[after=" + after + ", possibilities=" + availablePaths.size() + ", difference=" + difference + ", min_intake_moments=" + min + ", arrival=" + arrival.getHour() + ", start=" + start + ", paths=" + availablePaths.size() + ", path=" + path + "]");
+		System.out.println("Demarcate[after=" + after + ", possibilities=" + availablePaths.size() + ", difference=" + difference + ", min_intake_moments=" + steps + ", arrival=" + arrival.getHour() + ", start=" + start + ", paths=" + availablePaths.size() + ", path=" + path + "]");
 		for(int i = 0; i < path.getSteps().length; i++) {
 			final int step = path.getSteps()[i];
 			if (i != 0 || !after) {

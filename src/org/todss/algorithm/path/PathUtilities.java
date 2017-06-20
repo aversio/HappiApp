@@ -47,7 +47,7 @@ public class PathUtilities {
 	 * @param target The target amount.
 	 * @return A list of possible paths.
 	 */
-	public static List<Path> findPossiblePaths(int n, int margin, int target) {
+	private static List<Path> findPossiblePaths(int n, int margin, int target) {
 		return findPossiblePaths(n, target, -margin, margin, PATH_STEPS);
 	}
 
@@ -69,7 +69,7 @@ public class PathUtilities {
 	 * @param steps The steps
 	 * @return A 2D array of paths.
 	 */
-	public static List<Path> findPossiblePaths(int n, int target, int min, int max, int... steps) {
+	private static List<Path> findPossiblePaths(int n, int target, int min, int max, int... steps) {
 		int[] clonedInput = steps.clone();
 		final List<Path> result = new ArrayList<>();
 		int carry;
@@ -119,7 +119,7 @@ public class PathUtilities {
 	 * @param arrival The arrival date.
 	 * @param frequency The frequency.
 	 */
-	public static void setCosts(int min, List<Path> paths, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency, boolean after) {
+	private static void setCosts(int steps, List<Path> paths, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency, boolean after) {
 		for(Path path : paths) {
 			//we create a copy here of start
 			ZonedDateTime next = start.minusHours(0);
@@ -129,7 +129,7 @@ public class PathUtilities {
 			if (after) {
 				original = next.withZoneSameInstant(arrival.getZone());
 			} else {
-				original = SmartAlgorithm.getNextIntakeDate(next, frequency, -min);
+				original = SmartAlgorithm.getNextIntakeDate(next, frequency, -steps);
 			}
 			for(int i = 0; i < path.getSteps().length; i++) {
 				final int step = path.getSteps()[i];
@@ -147,9 +147,19 @@ public class PathUtilities {
 		}
 	}
 
-	public static List<Path> findPathsForTargetDate(int min, int difference, ZonedDateTime start, ZonedDateTime targetDate, Frequency frequency, boolean after) {
-		final List<Path> paths = PathUtilities.findPossiblePaths(min, frequency.getMargin(), difference);
-		PathUtilities.setCosts(min, paths, start, targetDate, frequency, after);
+	/**
+	 * Find paths that are after or before the target date.
+	 * @param steps The minimum amount of steps.
+	 * @param difference The time difference.
+	 * @param start The start date.
+	 * @param targetDate The target date.
+	 * @param frequency The frequency.
+	 * @param after If we demarcate afterwards.
+	 * @return A list of paths.
+	 */
+	public static List<Path> findPathsForTargetDate(int steps, int difference, ZonedDateTime start, ZonedDateTime targetDate, Frequency frequency, boolean after) {
+		final List<Path> paths = PathUtilities.findPossiblePaths(steps, frequency.getMargin(), difference);
+		PathUtilities.setCosts(steps, paths, start, targetDate, frequency, after);
 		final List<Path> result = new ArrayList<>();
 		for(Path path : paths) {
 			ZonedDateTime next = SmartAlgorithm.getNextIntakeDate(start, frequency, after).withZoneSameLocal(targetDate.getZone());
@@ -174,7 +184,7 @@ public class PathUtilities {
 				}
 			}
 		}
-		if (ENABLE_INTAKE_WHILE_TRAVELING && result.size() == 0 && min == MAX_INTAKE_MOMENTS) {
+		if (ENABLE_INTAKE_WHILE_TRAVELING && result.size() == 0 && steps == MAX_INTAKE_MOMENTS) {
 			result.add(getShortestPath(paths));
 		}
 		return result;
