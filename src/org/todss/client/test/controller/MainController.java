@@ -16,17 +16,27 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.todss.algorithm.a.Algorithm;
+import javafx.util.StringConverter;
+import org.todss.algorithm.Algorithm;
+import org.todss.algorithm.AlgorithmContext;
+import org.todss.algorithm.impl.BruteAlgorithm;
+import org.todss.algorithm.impl.SmartAlgorithm;
+import org.todss.algorithm.model.Alarm;
+import org.todss.algorithm.model.Frequency;
+import org.todss.algorithm.model.Intake;
+import org.todss.algorithm.model.Travel;
 import org.todss.client.test.model.Client;
+import org.todss.client.test.model.FXTravel;
 import org.todss.client.test.model.Preset;
-import org.todss.algorithm.a.model.*;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -75,7 +85,7 @@ public class MainController implements Initializable {
     private Button travelNewButton;
 
     @FXML
-    private ListView<Travel> travelsListView;
+    private ListView<FXTravel> travelsListView;
 
     @FXML
     private VBox travelContentVBox;
@@ -110,11 +120,39 @@ public class MainController implements Initializable {
     @FXML
     private TreeTableColumn<Intake, String> intakeTimeZoneTreeTableColumn;
 
+    @FXML
+    private ChoiceBox<Algorithm> algorithmChoiceBox;
+
+    @FXML
+    private Button algorithmRawOutputButton;
+    private List<Intake> intakes = new ArrayList<>();
+
     public static MainController mainController;
     private Client client = Client.getInstance();
+    private List<Algorithm> algorithms = new ArrayList<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        algorithms.add(new BruteAlgorithm());
+        algorithms.add(new SmartAlgorithm());
+
+        algorithmChoiceBox.getItems().addAll(algorithms);
+        algorithmChoiceBox.getSelectionModel().selectFirst();
+
+        algorithmChoiceBox.setConverter(new StringConverter<Algorithm>() {
+            @Override
+            public String toString(Algorithm object) {
+                return object.name();
+            }
+
+            @Override
+            public Algorithm fromString(String string) {
+                return null;
+            }
+        });
+
+        algorithmChoiceBox.setOnAction(event -> savePreset());
+
         intakesTreeTableView.setShowRoot(false);
 
         intakeDateTreeTableColumn.setCellFactory(new Callback<TreeTableColumn<Intake, String>, TreeTableCell<Intake, String>>() {
@@ -128,7 +166,7 @@ public class MainController implements Initializable {
                         Intake intake = getTreeTableRow().getItem();
 
                         if (empty || intake == null) {
-                            setGraphic(null);
+                            setText(null);
                         } else {
                             setText(intake.getDate().format(DateTimeFormatter.ofPattern("d-M-yyyy")));
                         }
@@ -148,7 +186,7 @@ public class MainController implements Initializable {
                         Intake intake = getTreeTableRow().getItem();
 
                         if (empty || intake == null) {
-                            setGraphic(null);
+                            setText(null);
                         } else {
                             setText(intake.getDate().format(DateTimeFormatter.ofPattern("H:mm")));
                         }
@@ -168,7 +206,7 @@ public class MainController implements Initializable {
                         Intake intake = getTreeTableRow().getItem();
 
                         if (empty || intake == null) {
-                            setGraphic(null);
+                            setText(null);
                         } else {
                             setText(intake.getDate().getZone().toString());
                         }
@@ -261,16 +299,16 @@ public class MainController implements Initializable {
         travelNewButton.setOnAction(event -> {
             ZonedDateTime departure = ZonedDateTime.now(ZoneId.systemDefault());
             ZonedDateTime arrival = ZonedDateTime.now(ZoneId.systemDefault()).plusHours(18);
-            Travel travel = new Travel(departure, arrival);
+            FXTravel travel = new FXTravel(departure, arrival);
 
             client.getSelectedPreset().addTravel(travel, true);
 
             travelsListView.getSelectionModel().select(travel);
         });
 
-        travelsListView.setCellFactory(param -> new ListCell<Travel>() {
+        travelsListView.setCellFactory(param -> new ListCell<FXTravel>() {
             @Override
-            protected void updateItem(Travel travel, boolean empty) {
+            protected void updateItem(FXTravel travel, boolean empty) {
                 super.updateItem(travel, empty);
 
                 if (travel != null) {
@@ -292,7 +330,7 @@ public class MainController implements Initializable {
         });
 
         travelsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            Travel travel = observable.getValue();
+            FXTravel travel = observable.getValue();
 
             if (travel != null) {
                 travelActiveCheckBox.setSelected(getSelectedPreset().isTravelActive(travel));
@@ -339,7 +377,7 @@ public class MainController implements Initializable {
         travelActiveCheckBox.setOnAction(event -> savePreset());
 
         travelDeleteButton.setOnAction(event -> {
-            Travel travel = travelsListView.getSelectionModel().getSelectedItem();
+            FXTravel travel = travelsListView.getSelectionModel().getSelectedItem();
 
             if (travelsListView.getSelectionModel().getSelectedIndex() != 0)
                 travelsListView.getSelectionModel().selectPrevious();
@@ -347,6 +385,17 @@ public class MainController implements Initializable {
                 travelsListView.getSelectionModel().selectNext();
 
             getSelectedPreset().removeTravel(travel);
+        });
+
+        algorithmRawOutputButton.setOnAction(event -> {
+            TextArea textArea = new TextArea();
+            textArea.setText(rawIntakes(intakes));
+
+            Stage dialog = new Stage();
+            Scene scene = new Scene(textArea);
+
+            dialog.setScene(scene);
+            dialog.show();
         });
     }
 
@@ -435,15 +484,15 @@ public class MainController implements Initializable {
 
         Frequency frequency = alarmFrequencyChoiceBox.getValue();
         ZonedDateTime date = ZonedDateTime.now().withHour(hours).withMinute(minutes).withSecond(0).withNano(0);
-        int margin = Integer.parseInt(alarmMarginTextField.getText()) * 60;
+//        int margin = Integer.parseInt(alarmMarginTextField.getText()) * 60;
 
-        Alarm alarm = new Alarm(frequency, date, margin);
+        Alarm alarm = new Alarm(frequency, date);
 
         client.getSelectedPreset().setAlarm(alarmNumber, alarm, status);
     }
 
     private void saveTravels() {
-        Travel travel = travelsListView.getSelectionModel().getSelectedItem();
+        FXTravel travel = travelsListView.getSelectionModel().getSelectedItem();
 
         if (travelDepartureDatePicker.getValue() != null
                 && !travelDepartureTimeTextField.getText().isEmpty()
@@ -485,18 +534,17 @@ public class MainController implements Initializable {
 
     private void showIntakes() {
         Alarm alarm = getSelectedPreset().getAlarms()[0];
-        Travel travel = getSelectedPreset().getTravelList().get(0);
+        List<Travel> travels = new ArrayList<>();
+        for(FXTravel travel : getSelectedPreset().getTravelList()) {
+            travels.add(travel.toTravel());
+        }
 
-        System.out.println(alarm);
-        System.out.println(travel);
-
-        Algorithm algorithm = new Algorithm(alarm, travel);
-        Path result = algorithm.execute();
+        Algorithm algorithm = algorithmChoiceBox.getValue();
+        List<Intake> intakes = algorithm.run(new AlgorithmContext(alarm, travels));
+        this.intakes = intakes;
 
         TreeItem<Intake> root = new TreeItem<>();
-        if (result != null) {
-            List<Intake> intakes = result.getIntakes();
-
+        if (intakes != null && !intakes.isEmpty()) {
             for (Intake intake : intakes) {
                 root.getChildren().add(new TreeItem<>(intake));
             }
@@ -505,8 +553,31 @@ public class MainController implements Initializable {
         Platform.runLater(() -> {
             intakesTreeTableView.setRoot(root);
 
-            if (result == null)
+            if (intakes == null || !intakes.isEmpty())
                 intakesTreeTableView.setPlaceholder(new Text("No solution :("));
         });
+    }
+
+    private String rawIntakes(List<Intake> intakes) {
+        StringBuilder output = new StringBuilder();
+
+        Intake prevIntake = null;
+        for (int i = 0; i < intakes.size(); i++) {
+            Intake intake = intakes.get(i);
+
+            if (prevIntake != null) {
+                Duration difference = Duration.between(prevIntake.getDate(), intake.getDate());
+
+                output.append(
+                        String.format("\t+%s", difference.toHours()) + "\n"
+                );
+            }
+
+            output.append(String.format("[%d] %s", i, intake.getDate()) + "\n");
+
+            prevIntake = intake;
+        }
+
+        return output.toString();
     }
 }

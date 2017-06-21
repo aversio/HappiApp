@@ -1,9 +1,11 @@
-package org.todss.algorithm.a;
+package org.todss.algorithm.impl;
 
-import org.todss.algorithm.a.model.Alarm;
-import org.todss.algorithm.a.model.Intake;
-import org.todss.algorithm.a.model.Path;
-import org.todss.algorithm.a.model.Travel;
+import org.todss.algorithm.Algorithm;
+import org.todss.algorithm.AlgorithmContext;
+import org.todss.algorithm.model.Alarm;
+import org.todss.algorithm.model.Intake;
+import org.todss.algorithm.model.Path;
+import org.todss.algorithm.model.Travel;
 
 import java.time.Duration;
 import java.time.ZoneId;
@@ -18,11 +20,11 @@ import static java.lang.Math.round;
 import static java.lang.StrictMath.abs;
 
 /**
- * Algorithm for an alarm with travels in mind.
+ * BruteAlgorithm for an alarm with travels in mind.
  *
  * All times are in minutes.
  */
-public class Algorithm {
+public class BruteAlgorithm implements Algorithm {
     /**
      * Alarm with desired time.
      */
@@ -57,15 +59,22 @@ public class Algorithm {
         checkIsPossible = false;
     }
 
+    public BruteAlgorithm() {
+    }
+
     /**
      * New algorithm for calculating paths.
      *
      * @param alarm Desired time for alarm
      * @param travel Travel for new time zone
      */
-    public Algorithm(Alarm alarm, Travel travel) {
+    public BruteAlgorithm(Alarm alarm, Travel travel) {
         this.alarm = alarm;
         this.travel = travel;
+    }
+
+    public String name() {
+        return "Brute-algorithm";
     }
 
     /**
@@ -153,7 +162,7 @@ public class Algorithm {
      */
     public Path execute() {
         // Start algorithm
-        addPaths(0, new Path());
+        addPaths(new Path());
 
         System.out.println("Count: " + count);
         System.out.println();
@@ -215,12 +224,11 @@ public class Algorithm {
     /**
      * Generate new paths of a previous path.
      *
-     * @param counter moments after start
      * @param path previous path
      */
-    private void addPaths(int counter, Path path) {
+    private void addPaths(Path path) {
         // FIX
-        counter = path.getIntakes().size();
+        int counter = path.getIntakes().size();
 
         // Targets of new and previous moments
         ZonedDateTime prevTargetDateTime = getTargetDateTime(counter - 1);
@@ -265,8 +273,12 @@ public class Algorithm {
             );
 
             // Create new intake
-            Intake newIntake = new Intake(start.plusMinutes(i));
-            newIntake.setDate(newIntake.getDate().withZoneSameInstant(getZoneId(newIntake.getDate())));
+//            Intake newIntake = new Intake(start.plusMinutes(i));
+//            newIntake.setDate(newIntake.getDate().withZoneSameInstant(getZoneId(newIntake.getDate())));
+            ZonedDateTime date = start.plusMinutes(i);
+            date = date.withZoneSameInstant(getZoneId(date));
+
+            Intake newIntake = new Intake(date);
 
             // Check intake
             if (checkIsPossible && !isPossible(newIntake.getDate())) {
@@ -333,7 +345,22 @@ public class Algorithm {
             return;
 
         if (!paths.isEmpty()) {
-            addPaths(counter + 1, paths.poll());
+            addPaths(paths.poll());
         }
+    }
+
+    @Override
+    public List<Intake> run(AlgorithmContext context) {
+        if (context.getAlarm() != null && !context.getTravels().isEmpty()) {
+            alarm = context.getAlarm();
+            travel = context.getTravels().get(0);
+
+            Path result = execute();
+
+            if (result != null)
+                return result.getIntakes();
+        }
+
+        return null;
     }
 }
