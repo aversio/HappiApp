@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 /**
  * A class representing a single intake moment.
  * @author Displee
+ * @author Jonathan
  */
 public class IntakeMoment {
 

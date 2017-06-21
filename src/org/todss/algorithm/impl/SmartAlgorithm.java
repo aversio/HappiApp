@@ -1,5 +1,7 @@
-package org.todss.algorithm;
+package org.todss.algorithm.impl;
 
+import org.todss.algorithm.Algorithm;
+import org.todss.algorithm.AlgorithmContext;
 import org.todss.algorithm.path.Path;
 import org.todss.algorithm.path.PathUtilities;
 import org.todss.model.Alarm;
@@ -17,7 +19,7 @@ import static org.todss.Constants.MAX_INTAKE_MOMENTS;
  * A class representing our algorithm.
  * @author Displee
  */
-public class SmartAlgorithm {
+public class SmartAlgorithm implements Algorithm {
 
 	/**
 	 * Get the date range in which we calculate the intake moments.
@@ -44,12 +46,8 @@ public class SmartAlgorithm {
 		return dates;
 	}
 
-	/**
-	 * Run this algorithm.
-	 * @param context The context.
-	 * @return A list of intake moments.
-	 */
-	public static List<IntakeMoment> run(AlgorithmContext context) {
+	@Override
+	public List<IntakeMoment> run(AlgorithmContext context) {
 		final ZonedDateTime[] range = getRange(context.getTravels());
 		if (range == null) {
 			return null;
@@ -102,7 +100,6 @@ public class SmartAlgorithm {
 			}
 			list.set(i, new IntakeMoment(current));
 		}
-		writeIntakes(list);
 		return list;
 	}
 
@@ -171,7 +168,7 @@ public class SmartAlgorithm {
 	 * @param alarm The alarm.
 	 * @return If we have to force an extra intake moment.
 	 */
-	private static boolean forceExtraIntake(Alarm alarm) {
+	private boolean forceExtraIntake(Alarm alarm) {
 		return false;
 	}
 
@@ -186,7 +183,7 @@ public class SmartAlgorithm {
 	 * @param after If we demarcate after the travel.
 	 * @return A list of paths.
 	 */
-	private static List<Path> findAvailablePaths(int steps, int difference, ZonedDateTime start, ZonedDateTime departure, ZonedDateTime arrival, Frequency frequency, boolean after) {
+	private List<Path> findAvailablePaths(int steps, int difference, ZonedDateTime start, ZonedDateTime departure, ZonedDateTime arrival, Frequency frequency, boolean after) {
 		if (steps > MAX_INTAKE_MOMENTS) {
 			return null;
 		}
@@ -201,7 +198,7 @@ public class SmartAlgorithm {
 		return availablePaths.size() == 0 ? null : availablePaths;
 	}
 
-	private static int demarcate(ZonedDateTime current, ZonedDateTime departure, ZonedDateTime arrival, int difference, Frequency frequency, int index, List<IntakeMoment> list, boolean after) {
+	private int demarcate(ZonedDateTime current, ZonedDateTime departure, ZonedDateTime arrival, int difference, Frequency frequency, int index, List<IntakeMoment> list, boolean after) {
 		final int steps = (int) Math.ceil(difference / (double) (difference < 0 ? -frequency.getMargin() : frequency.getMargin()));
 		ZonedDateTime previous = getNextIntakeDate(current, frequency);
 		if (difference < 0) {
@@ -233,23 +230,6 @@ public class SmartAlgorithm {
 			list.set(after ? (index + i + 1) : (index - i), new IntakeMoment(previous));
 		}
 		return path.getSteps().length;
-	}
-
-	/**
-	 * Write a list of intake moments in a fancy format.
-	 * @param intakes The list of intakes to write.
-	 */
-	private static void writeIntakes(List<IntakeMoment> intakes) {
-		IntakeMoment prevIntake = null;
-		for (int i = 0; i < intakes.size(); i++) {
-			IntakeMoment intake = intakes.get(i);
-			if (prevIntake != null) {
-				Duration difference = Duration.between(prevIntake.getDate(), intake.getDate());
-				System.out.println(String.format("\t+%s", difference.toHours()));
-			}
-			System.out.println(String.format("[%d] %s", i, intake.getDate()));
-			prevIntake = intake;
-		}
 	}
 
 }

@@ -6,17 +6,9 @@ import java.util.Properties;
 /**
  * A class representing an alarm used to remind you.
  * @author Displee
+ * @author Displee
  */
 public class Alarm {
-
-	/**
-	 * The default properties.
-	 */
-	private static final Properties DEFAULT_PROPERTIES = new Properties();
-
-	static {
-		DEFAULT_PROPERTIES.put("sleeping", false);
-	}
 
 	/**
 	 * The frequency.
@@ -29,11 +21,6 @@ public class Alarm {
 	private ZonedDateTime start;
 
 	/**
-	 * The properties of this alarm.
-	 */
-    private Properties properties = new Properties(DEFAULT_PROPERTIES);
-
-	/**
 	 * Construct a new {@code Alarm} {@code Object}.
 	 * @param frequency The frequency.
 	 * @param start The start date.
@@ -42,15 +29,6 @@ public class Alarm {
         this.frequency = frequency;
         this.start = start;
     }
-
-	/**
-	 * Get a property from this alarm.
-	 * @param key The key of the property to get.
-	 * @return The value of the property.
-	 */
-	public Object getProperty(String key) {
-    	return properties.get(key);
-	}
 
 	/**
 	 * Get the frequency.

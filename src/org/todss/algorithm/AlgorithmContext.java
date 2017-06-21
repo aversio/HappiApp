@@ -1,9 +1,9 @@
 package org.todss.algorithm;
 
 import org.todss.model.Alarm;
-import org.todss.model.IntakeMoment;
 import org.todss.model.Travel;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,16 +23,20 @@ public class AlgorithmContext {
 	private final List<Travel> travels;
 
 	/**
-	 * A list of intake moments.
+	 * Construct a new {@code AlgorithmContext} {@code Object}.
+	 * @param alarm The alarm.
+	 * @param travels The travels.
 	 */
-	private List<IntakeMoment> intakes;
+	public AlgorithmContext(Alarm alarm, Travel... travels) {
+		this(alarm, Arrays.asList(travels));
+	}
 
 	/**
 	 * Construct a new {@code AlgorithmContext} {@code Object}.
-	 * @param travels The travels.
 	 * @param alarm The alarm.
+	 * @param travels The travels.
 	 */
-	public AlgorithmContext(List<Travel> travels, Alarm alarm) {
+	public AlgorithmContext(Alarm alarm, List<Travel> travels) {
 		this.travels = travels;
 		this.alarm = alarm;
 	}
@@ -51,22 +55,6 @@ public class AlgorithmContext {
 	 */
 	public Alarm getAlarm() {
 		return alarm;
-	}
-
-	/**
-	 * Get the generated intake moments of this context.
-	 * @return {@code intakes}
-	 */
-	public List<IntakeMoment> getIntakes() {
-		return intakes;
-	}
-
-	/**
-	 * Set a new list of intake moments for this context.
-	 * @param intakes The new list of intake moments to set.
-	 */
-	public void setIntakes(List<IntakeMoment> intakes) {
-		this.intakes = intakes;
 	}
 
 }

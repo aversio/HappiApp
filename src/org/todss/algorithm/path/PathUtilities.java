@@ -1,6 +1,6 @@
 package org.todss.algorithm.path;
 
-import org.todss.algorithm.SmartAlgorithm;
+import org.todss.algorithm.impl.SmartAlgorithm;
 import org.todss.model.Frequency;
 
 import java.time.Duration;

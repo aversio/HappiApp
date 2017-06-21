@@ -1,13 +1,15 @@
 package test;
 
 import org.junit.jupiter.api.Test;
+import org.todss.algorithm.Algorithm;
 import org.todss.algorithm.AlgorithmContext;
-import org.todss.algorithm.SmartAlgorithm;
+import org.todss.algorithm.impl.SmartAlgorithm;
 import org.todss.model.Alarm;
 import org.todss.model.Frequency;
 import org.todss.model.IntakeMoment;
 import org.todss.model.Travel;
 
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -20,27 +22,37 @@ import java.util.List;
 public class AlgorithmTest {
 
 	/**
+	 * If we have to write the intakes after a test.
+	 */
+	private static final boolean WRITE_INTAKES = false;
+
+	/**
+	 * The algorithm instance we use.
+	 */
+	private static final Algorithm ALGORITHM = new SmartAlgorithm();
+
+	/**
 	 * The alarm used to test our scenario's.
 	 */
 	private static final Alarm ALARM = new Alarm(Frequency.DAY, ZonedDateTime.parse("2017-04-07T08:00+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")));
 
 	/**
-	 * Finally, test our algorithm.
+	 * Test the algorithm.
 	 * @param travels The travels.
 	 * @return A list of intake moments.
 	 */
-	public List<IntakeMoment> test(List<Travel> travels) {
-		return test(travels, ALARM);
+	private List<IntakeMoment> test(List<Travel> travels) {
+		return test(ALARM, travels);
 	}
 
 	/**
-	 * Finally, test our algorithm.
+	 * Test the algorithm.
 	 * @param travels The travels.
 	 * @param alarm The alarm.
 	 * @return A list of intake moments.
 	 */
-	public List<IntakeMoment> test(List<Travel> travels, Alarm alarm) {
-		return test(new AlgorithmContext(travels, alarm));
+	private List<IntakeMoment> test(Alarm alarm, List<Travel> travels) {
+		return test(new AlgorithmContext(alarm, travels));
 	}
 
 	/**
@@ -48,12 +60,32 @@ public class AlgorithmTest {
 	 * @param context The algorithm context.
 	 * @return A list of intake moments.
 	 */
-	public List<IntakeMoment> test(AlgorithmContext context) {
+	private List<IntakeMoment> test(AlgorithmContext context) {
 		final long start = System.currentTimeMillis();
-		final List<IntakeMoment> list = SmartAlgorithm.run(context);
+		final List<IntakeMoment> list = ALGORITHM.run(context);
 		System.out.println("Took " + (System.currentTimeMillis() - start) + " ms.");
 		assert list != null && list.size() > 0;
+		if (WRITE_INTAKES) {
+			writeIntakes(list);
+		}
 		return list;
+	}
+
+	/**
+	 * Write a list of intake moments in a fancy format.
+	 * @param intakes The list of intakes to write.
+	 */
+	private void writeIntakes(List<IntakeMoment> intakes) {
+		IntakeMoment prevIntake = null;
+		for (int i = 0; i < intakes.size(); i++) {
+			IntakeMoment intake = intakes.get(i);
+			if (prevIntake != null) {
+				Duration difference = Duration.between(prevIntake.getDate(), intake.getDate());
+				System.out.println(String.format("\t+%s", difference.toHours()));
+			}
+			System.out.println(String.format("[%d] %s", i, intake.getDate()));
+			prevIntake = intake;
+		}
 	}
 
 	/**
