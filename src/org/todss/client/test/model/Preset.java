@@ -7,9 +7,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.Callback;
-import org.todss.model.Alarm;
-import org.todss.model.Frequency;
-import org.todss.model.Travel;
+import org.todss.algorithm.model.Alarm;
+import org.todss.algorithm.model.Frequency;
 
 public class Preset {
     private StringProperty name = new SimpleStringProperty();
@@ -17,7 +16,7 @@ public class Preset {
     private boolean[] alarmStatuses = new boolean[2];
     private Frequency frequency;
     private int margin = 0;
-    private ObservableMap<Travel, Boolean> travels = FXCollections.observableHashMap();
+    private ObservableMap<FXTravel, Boolean> travels = FXCollections.observableHashMap();
 
     public Preset(String name) {
         setName(name);
@@ -40,18 +39,18 @@ public class Preset {
         return alarms;
     }
 
-    public ObservableMap<Travel, Boolean> getTravels() {
+    public ObservableMap<FXTravel, Boolean> getTravels() {
         return travels;
     }
 
-    public ObservableList<Travel> getTravelList() {
-        ObservableList<Travel> list = FXCollections.observableArrayList(Travel.extractor());
+    public ObservableList<FXTravel> getTravelList() {
+        ObservableList<FXTravel> list = FXCollections.observableArrayList(FXTravel.extractor());
         list.addAll(travels.keySet());
 
         return list;
     }
 
-    public boolean isTravelActive(Travel travel) {
+    public boolean isTravelActive(FXTravel travel) {
         try {
             return travels.get(travel);
         } catch (Exception e) {
@@ -59,15 +58,15 @@ public class Preset {
         }
     }
 
-    public void setTravelActive(Travel travel, boolean status) {
+    public void setTravelActive(FXTravel travel, boolean status) {
         travels.put(travel, status);
     }
 
-    public void addTravel(Travel travel, boolean status) {
+    public void addTravel(FXTravel travel, boolean status) {
         travels.put(travel, status);
     }
 
-    public void removeTravel(Travel travel) {
+    public void removeTravel(FXTravel travel) {
         travels.remove(travel);
     }
 

@@ -1,4 +1,4 @@
-package org.todss.model;
+package org.todss.algorithm.model;
 
 import java.util.ArrayList;
 import java.util.List;
