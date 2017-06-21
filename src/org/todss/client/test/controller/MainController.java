@@ -16,10 +16,10 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.todss.Algorithm;
+import org.todss.algorithm.a.Algorithm;
 import org.todss.client.test.model.Client;
 import org.todss.client.test.model.Preset;
-import org.todss.model.*;
+import org.todss.algorithm.a.model.*;
 
 import java.io.IOException;
 import java.net.URL;

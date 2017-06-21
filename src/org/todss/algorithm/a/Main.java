@@ -1,6 +1,6 @@
-package org.todss;
+package org.todss.algorithm.a;
 
-import org.todss.model.*;
+import org.todss.algorithm.a.model.*;
 
 import java.time.Duration;
 import java.time.ZoneId;

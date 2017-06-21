@@ -1,9 +1,9 @@
-package org.todss;
+package org.todss.algorithm.a;
 
-import org.todss.model.Alarm;
-import org.todss.model.Intake;
-import org.todss.model.Path;
-import org.todss.model.Travel;
+import org.todss.algorithm.a.model.Alarm;
+import org.todss.algorithm.a.model.Intake;
+import org.todss.algorithm.a.model.Path;
+import org.todss.algorithm.a.model.Travel;
 
 import java.time.Duration;
 import java.time.ZoneId;

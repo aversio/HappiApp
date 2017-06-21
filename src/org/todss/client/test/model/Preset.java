@@ -7,9 +7,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.Callback;
-import org.todss.model.Alarm;
-import org.todss.model.Frequency;
-import org.todss.model.Travel;
+import org.todss.algorithm.a.model.Alarm;
+import org.todss.algorithm.a.model.Frequency;
+import org.todss.algorithm.a.model.Travel;
 
 public class Preset {
     private StringProperty name = new SimpleStringProperty();

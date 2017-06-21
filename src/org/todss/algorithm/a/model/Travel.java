@@ -1,4 +1,4 @@
-package org.todss.model;
+package org.todss.algorithm.a.model;
 
 import javafx.beans.Observable;
 import javafx.beans.property.Property;

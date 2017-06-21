@@ -1,4 +1,4 @@
-package org.todss.model;
+package org.todss.algorithm.a.model;
 
 public enum Frequency {
     HALF_DAY(12),
