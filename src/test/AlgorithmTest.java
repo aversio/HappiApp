@@ -280,4 +280,151 @@ public class AlgorithmTest {
 		final List<IntakeMoment> intakes = test(travels);
 	}
 
+	/**
+	 * Test attributes:
+	 * Test id =  14 & 20
+	 * Test name: Travel with 2 changes & Travel to a countrey with MAX time difference
+	 * Journey:
+	 * 		From: Europe/Amsterdam
+	 * 		To: Asia/Anadyr
+	 * 		Date category: winter time
+	 * 		Departure time: night
+	 * 		Arrival time: afternoon
+	 * Return trip:
+	 * 		From: Asia/Anadyr
+	 * 		To: Europe/Amsterdam
+	 * 		Date category: winter time
+	 * 		Departure time: evening
+	 * 		Arrival time: afternoon
+	 * Source: http://www.vliegtickets.nl/
+	 */
+	@Test
+	public void test14() {
+		List<Travel> travels = new ArrayList<>();
+		Travel journey = new Travel(
+				ZonedDateTime.parse("2017-08-21T00:15+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
+				ZonedDateTime.parse("2017-08-22T14:50+00:00").withZoneSameLocal(ZoneId.of("Asia/Anadyr"))
+		);
+		travels.add(journey);
+		Travel returnTrip = new Travel(
+				ZonedDateTime.parse("2017-08-29T23:15+00:00").withZoneSameLocal(ZoneId.of("Asia/Anadyr")),
+				ZonedDateTime.parse("2017-08-30T13:50+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
+		);
+		travels.add(returnTrip);
+		final List<IntakeMoment> intakes = test(travels);
+	}
+
+	/**
+	 * Test attributes:
+	 * Test id =  22 & 16
+	 * Test name: Travel to a countrey with MIN time difference & Travel with a length of 3 days.
+	 * Journey:
+	 * 		From: Europe/Amsterdam
+	 * 		To: Asia/Anadyr
+	 * 		Date category: winter time
+	 * 		Departure time: afternoon
+	 * 		Arrival time: afternoon
+	 * Return trip:
+	 * 		From: Asia/Anadyr
+	 * 		To: Europe/Amsterdam
+	 * 		Date category: winter time
+	 * 		Departure time: evening
+	 * 		Arrival time: evening
+	 * Source: http://www.vliegtickets.nl/
+	 */
+	@Test
+	public void test22() {
+		List<Travel> travels = new ArrayList<>();
+		Travel journey = new Travel(
+				ZonedDateTime.parse("2017-09-21T13:30+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
+				ZonedDateTime.parse("2017-09-21T14:40+00:00").withZoneSameLocal(ZoneId.of("Europe/Antwerpen"))
+		);
+		travels.add(journey);
+		Travel returnTrip = new Travel(
+				ZonedDateTime.parse("2017-09-24T20:15+00:00").withZoneSameLocal(ZoneId.of("Europe/Antwerpen")),
+				ZonedDateTime.parse("2017-09-34T21:25+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
+		);
+		travels.add(returnTrip);
+		final List<IntakeMoment> intakes = test(travels);
+	}
+
+	/**
+	 * Test attributes:
+	 * Test id =  21
+	 * Test name: Travel to a countrey with AVG time difference
+	 * Journey:
+	 * 		From: Europe/Amsterdam
+	 * 		To: Asia/Tehera
+	 * 		Date category: winter time
+	 * 		Departure time: night
+	 * 		Arrival time: afternoon
+	 * Return trip:
+	 * 		From: Asia/Tehera
+	 * 		To: Europe/Amsterdam
+	 * 		Date category: winter time
+	 * 		Departure time: evening
+	 * 		Arrival time: afternoon
+	 * Source: http://www.vliegtickets.nl/
+	 */
+	@Test
+	public void tes21(){
+		List<Travel> travels = new ArrayList<>();
+		Travel jouney = new Travel(
+				ZonedDateTime.parse("2017-08-21T17:40+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
+				ZonedDateTime.parse("2017-08-22T01:20+00:00").withZoneSameLocal(ZoneId.of("Asia/Teheran"))
+		);
+		travels.add(jouney);
+		Travel returnTrip = new Travel(
+				ZonedDateTime.parse("2017-08-25T09:00+00:00").withZoneSameLocal(ZoneId.of("Asia/Teheran")),
+				ZonedDateTime.parse("2017-08-25T17:20+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
+		);
+		travels.add(returnTrip);
+		final List<IntakeMoment> intakes = test(travels);
+	}
+
+	/**
+	 * Test attributes:
+	 * Test id =  23
+	 * Test name: Travel with 1 schema to 2 different locations
+	 * firstJourney:
+	 * 		From: Europe/Amsterdam
+	 * 		To: Europe/Brussels
+	 * 		Date category: summer time
+	 * 		Departure time: afternoon
+	 * 		Arrival time: evening
+	 * secondJourney:
+	 * 		From: Europe/Brussels
+	 * 		To: Europe/Berlin
+	 * 		Date category: summer time
+	 * 		Departure time: morning
+	 * 		Arrival time: morning
+	 * Return trip:
+	 * 		From: Europe/Berlin
+	 * 		To: Europe/Amsterdam
+	 * 		Date category: summer time
+	 * 		Departure time: morning
+	 * 		Arrival time: morning
+	 * Source: http://www.vliegtickets.nl/
+	 */
+	@Test
+	public void tes23(){
+		List<Travel> travels = new ArrayList<>();
+		Travel firstJourney = new Travel(
+				ZonedDateTime.parse("2017-03-21T17:40+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
+				ZonedDateTime.parse("2017-03-21T18:80+00:00").withZoneSameLocal(ZoneId.of("Europe/Brussels"))
+		);
+		travels.add(firstJourney);
+		Travel secondJourney = new Travel(
+				ZonedDateTime.parse("2017-03-24T09:00+00:00").withZoneSameLocal(ZoneId.of("Europe/Brussels")),
+				ZonedDateTime.parse("2017-03-24T11:20+00:00").withZoneSameLocal(ZoneId.of("Europe/Berlin"))
+		);
+		travels.add(secondJourney);
+		Travel returnTrip = new Travel(
+				ZonedDateTime.parse("2017-03-25T09:00+00:00").withZoneSameLocal(ZoneId.of("Europe/Berlin")),
+				ZonedDateTime.parse("2017-03-25T10:20+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
+		);
+		travels.add(returnTrip);
+		final List<IntakeMoment> intakes = test(travels);
+	}
+
 }
