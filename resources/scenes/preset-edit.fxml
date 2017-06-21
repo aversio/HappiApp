@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="root" stylesheets="@../css/happi-test-application.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.todss.client.test.controller.PresetEditController">
+   <children>
+      <Label fx:id="messageLabel" text="Edit preset">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </Label>
+      <HBox styleClass="row">
+         <children>
+            <Label fx:id="nameLabel" text="Name" />
+            <TextField fx:id="nameTextField" prefWidth="200.0" />
+         </children>
+      </HBox>
+      <HBox styleClass="row">
+         <children>
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button fx:id="saveButton" alignment="TOP_LEFT" mnemonicParsing="false" text="Save" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" styleClass="root" stylesheets="@../css/happi-test-application.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.todss.client.test.controller.MainController">
+   <children>
+      <HBox styleClass="row">
+         <children>
+            <Label fx:id="presetLabel" text="Preset" />
+            <ComboBox fx:id="presetComboBox">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </ComboBox>
+            <Button fx:id="presetEditButton" disable="true" mnemonicParsing="false" text="Edit" />
+            <Button fx:id="presetDeleteButton" disable="true" mnemonicParsing="false" text="Delete" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button fx:id="presetNewButton" mnemonicParsing="false" text="New preset" />
+         </children>
+      </HBox>
+      <Separator prefWidth="200.0" />
+      <VBox fx:id="presetContextVBox" disable="true" styleClass="row">
+         <children>
+            <HBox styleClass="row">
+               <children>
+                  <CheckBox fx:id="alarmOneActiveCheckBox" mnemonicParsing="false" selected="true" />
+                  <Label fx:id="alarmOneLabel" text="Alarm 1" />
+                  <TextField fx:id="alarmOneTimeTextField" styleClass="time" text="8:00" />
+                  <Pane HBox.hgrow="ALWAYS" />
+                  <Label fx:id="alarmFrequencyLabel" text="Frequency" />
+                  <ChoiceBox fx:id="alarmFrequencyChoiceBox" />
+               </children>
+            </HBox>
+            <HBox styleClass="row">
+               <children>
+                  <CheckBox fx:id="alarmTwoActiveCheckBox" mnemonicParsing="false" />
+                  <Label fx:id="alarmTwoLabel" text="Alarm 2" />
+                  <TextField fx:id="alarmTwoTimeTextField" styleClass="time" text="22:00" />
+                  <Pane HBox.hgrow="ALWAYS" />
+                  <Label fx:id="alarmMarginLabel" text="Margin" />
+                  <TextField fx:id="alarmMarginTextField" styleClass="hours" text="4" />
+                  <Label fx:id="alarmMarginTimeLabel" text="hours" />
+               </children>
+            </HBox>
+            <Separator prefWidth="200.0" />
+            <VBox styleClass="row">
+               <children>
+                  <Button fx:id="travelNewButton" mnemonicParsing="false" text="Add travel" />
+                  <ListView fx:id="travelsListView" prefHeight="100.0" />
+               </children>
+            </VBox>
+            <VBox fx:id="travelContentVBox" styleClass="row">
+               <children>
+                  <HBox styleClass="row">
+                     <children>
+                        <Label fx:id="travelDepartureLabel" text="Departure" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="travelDepartureTimeTextField" styleClass="time" />
+                        <DatePicker fx:id="travelDepartureDatePicker" />
+                        <ComboBox fx:id="travelDepartureTimeZoneComboBox" prefWidth="150.0" />
+                     </children>
+                  </HBox>
+                  <HBox styleClass="row">
+                     <children>
+                        <Label fx:id="travelArrivalLabel" text="Arrival" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="travelArrivalTimeTextField" styleClass="time" />
+                        <DatePicker fx:id="travelArrivalDatePicker" />
+                        <ComboBox fx:id="travelArrivalTimeZoneComboBox" prefWidth="150.0" />
+                     </children>
+                  </HBox>
+                  <HBox styleClass="row">
+                     <children>
+                        <Label fx:id="travelStatusLabel" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <CheckBox fx:id="travelActiveCheckBox" mnemonicParsing="false" text="Active" />
+                        <Button fx:id="travelDeleteButton" mnemonicParsing="false" text="Delete travel" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <Separator prefWidth="200.0" />
+         </children>
+      </VBox>
+      <VBox styleClass="row">
+         <children>
+            <TreeTableView fx:id="intakesTreeTableView" prefHeight="200.0">
+              <columns>
+                <TreeTableColumn fx:id="intakeDateTreeTableColumn" prefWidth="100.0" text="Date" />
+                <TreeTableColumn fx:id="intakeTimeTreeTableColumn" prefWidth="121.0" text="Local time" />
+                  <TreeTableColumn fx:id="intakeTimeZoneTreeTableColumn" prefWidth="225.0" text="Time zone" />
+              </columns>
+            </TreeTableView>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

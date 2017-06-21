@@ -1,6 +1,5 @@
 package org.todss;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
 import org.todss.model.Alarm;
 import org.todss.model.Intake;
 import org.todss.model.Path;
@@ -16,16 +15,14 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import static java.lang.Math.round;
-import static java.lang.Math.subtractExact;
 import static java.lang.StrictMath.abs;
-import static java.lang.System.exit;
 
 /**
  * Algorithm for an alarm with travels in mind.
  *
  * All times are in minutes.
  */
-class Algorithm {
+public class Algorithm {
     /**
      * Alarm with desired time.
      */
@@ -56,8 +53,8 @@ class Algorithm {
     private int count = 0;
 
     {
-        maxCost = 1400;
-        checkIsPossible = true;
+        maxCost = 3000;
+        checkIsPossible = false;
     }
 
     /**
@@ -66,7 +63,7 @@ class Algorithm {
      * @param alarm Desired time for alarm
      * @param travel Travel for new time zone
      */
-    Algorithm(Alarm alarm, Travel travel) {
+    public Algorithm(Alarm alarm, Travel travel) {
         this.alarm = alarm;
         this.travel = travel;
     }
@@ -154,7 +151,7 @@ class Algorithm {
      *
      * @return path with lowest cost.
      */
-    Path execute() {
+    public Path execute() {
         // Start algorithm
         addPaths(0, new Path());
 
@@ -175,6 +172,9 @@ class Algorithm {
      * @return true if possible, false otherwise
      */
     private boolean isPossible(ZonedDateTime dateTime) {
+        if (dateTime.isAfter(travel.getDeparture()) && dateTime.isBefore(travel.getArrival()))
+            return true;
+
         return (dateTime.getHour() >= 8 && dateTime.getHour() <= 22);
     }
 
@@ -303,28 +303,36 @@ class Algorithm {
 
             paths.add(newPath);
 
-            List<Path> sameMarginPaths = new ArrayList<>();
-            for (Path testPath : paths) {
-                if (newPath.getTotalMargin() == testPath.getTotalMargin()
-                        //&& newPath.getLastIntake().equals(testPath.getLastIntake())
-                        && newPath.getIntakes().size() == testPath.getIntakes().size()
-                        ) {
-                    sameMarginPaths.add(testPath);
-                }
-            }
-
-            if (sameMarginPaths.size() > 1) {
-                sameMarginPaths.sort(Comparator.comparingLong(Path::getCost));
-
-                removeSameMarginPaths.addAll(
-                        sameMarginPaths.subList(1, sameMarginPaths.size())
-                );
-            }
-
-            paths.removeAll(removeSameMarginPaths);
+//            List<Path> sameMarginPaths = new ArrayList<>();
+//            for (Path testPath : paths) {
+//                if (newPath.getTotalMargin() == testPath.getTotalMargin()
+//                        //&& newPath.getLastIntake().equals(testPath.getLastIntake())
+//                        && newPath.getIntakes().size() == testPath.getIntakes().size()
+//                        ) {
+//                    sameMarginPaths.add(testPath);
+//                }
+//            }
+//
+//            if (sameMarginPaths.size() > 1) {
+//                sameMarginPaths.sort(Comparator.comparingLong(Path::getCost));
+//
+//                removeSameMarginPaths.addAll(
+//                        sameMarginPaths.subList(1, sameMarginPaths.size())
+//                );
+//            }
+//
+//            paths.removeAll(removeSameMarginPaths);
         }
 
-        if (!paths.isEmpty() && completedPaths.isEmpty()) {
+//        if (!paths.isEmpty() && completedPaths.isEmpty()) {
+//            addPaths(counter + 1, paths.poll());
+//        }
+
+
+        if (!completedPaths.isEmpty())
+            return;
+
+        if (!paths.isEmpty()) {
             addPaths(counter + 1, paths.poll());
         }
     }

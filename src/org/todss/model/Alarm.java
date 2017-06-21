@@ -36,4 +36,13 @@ public class Alarm {
     public void setMargin(int margin) {
         this.margin = margin;
     }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "frequency=" + frequency +
+                ", start=" + start +
+                ", margin=" + margin +
+                '}';
+    }
 }

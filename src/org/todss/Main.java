@@ -82,8 +82,68 @@ public class Main {
                 )
         );
 
+        // 5
+        departure = ZonedDateTime.parse("2017-05-19T19:51+00:00")
+                .withZoneSameLocal(ZoneId.of("Europe/Amsterdam"));
+        arrival = ZonedDateTime.parse("2017-05-20T19:51+00:00")
+                .withZoneSameLocal(ZoneId.of("America/North_Dakota/New_Salem"));
+        travels.add(
+                new Travel(
+                        departure,
+                        arrival
+                )
+        );
+
+        // 6
+        departure = ZonedDateTime.parse("2017-05-27T08:15+00:00")
+                .withZoneSameLocal(ZoneId.of("America/North_Dakota/New_Salem"));
+        arrival = ZonedDateTime.parse("2017-05-28T14:15+00:00")
+                .withZoneSameLocal(ZoneId.of("Europe/Amsterdam"));
+        travels.add(
+                new Travel(
+                        departure,
+                        arrival
+                )
+        );
+
+        // 7
+        departure = ZonedDateTime.parse("2017-05-27T08:15+00:00")
+                .withZoneSameLocal(ZoneId.of("America/North_Dakota/New_Salem"));
+        arrival = ZonedDateTime.parse("2017-05-28T14:15+00:00")
+                .withZoneSameLocal(ZoneId.of("Europe/Amsterdam"));
+        travels.add(
+                new Travel(
+                        departure,
+                        arrival
+                )
+        );
+
+        // 8
+        departure = ZonedDateTime.parse("2017-06-16T10:55+00:00")
+                .withZoneSameLocal(ZoneId.of("Europe/Amsterdam"));
+        arrival = ZonedDateTime.parse("2017-06-16T11:55+00:00")
+                .withZoneSameLocal(ZoneId.of("America/Los_Angeles"));
+        travels.add(
+                new Travel(
+                        departure,
+                        arrival
+                )
+        );
+
+        // 9
+        departure = ZonedDateTime.parse("2017-06-29T13:55+00:00")
+                .withZoneSameLocal(ZoneId.of("America/Los_Angeles"));
+        arrival = ZonedDateTime.parse("2017-06-30T09:15+00:00")
+                .withZoneSameLocal(ZoneId.of("Europe/Amsterdam"));
+        travels.add(
+                new Travel(
+                        departure,
+                        arrival
+                )
+        );
+
         // Set travel
-        Travel travel = travels.get(4);
+        Travel travel = travels.get(9);
 
         // Start measure
         ZonedDateTime start = ZonedDateTime.now();

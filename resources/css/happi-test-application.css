@@ -1,0 +1,35 @@
+.root {
+	-fx-spacing: 10;
+}
+
+.row {
+	-fx-alignment: center-left;
+	-fx-spacing: 10;
+}
+
+.combo-box,
+.text-field {
+	-fx-pref-width: 200;
+}
+
+.text-field.time {
+	-fx-pref-width: 5em;
+	-fx-alignment: center-right;
+}
+
+.text-field.hours {
+	-fx-pref-width: 3em;
+	-fx-alignment: center;
+}
+
+.text-field.invalid {
+	-fx-border-color: red;
+}
+
+Pane.split {
+	-fx-pref-width: 10;
+}
+
+.date-picker {
+	-fx-pref-width: 10em;
+}
