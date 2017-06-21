@@ -20,7 +20,7 @@ import static java.lang.Math.round;
 import static java.lang.StrictMath.abs;
 
 /**
- * BruteAlgorithm for an alarm with travels in mind.
+ * Algorithm for an alarm with travels in mind.
  *
  * All times are in minutes.
  */

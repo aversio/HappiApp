@@ -2,6 +2,9 @@ package org.todss.algorithm.model;
 
 import java.util.List;
 
+/**
+ * Unused. Created for the future.
+ */
 public class Medicine {
     private String name;
     private List<Alarm> alarms;

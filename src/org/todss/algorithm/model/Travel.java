@@ -71,13 +71,4 @@ public class Travel {
 	public ZonedDateTime getArrival() {
         return arrival;
     }
-
-	public void setDeparture(ZonedDateTime departure) {
-		this.departure = departure;
-	}
-
-	public void setArrival(ZonedDateTime arrival) {
-		this.arrival = arrival;
-	}
-
 }

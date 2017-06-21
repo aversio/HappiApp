@@ -61,7 +61,11 @@ public class Alarm {
         this.start = start;
     }
 
-    public int getMargin() {
+	/**
+	 * Get the margin.
+	 * @return margin in minutes
+	 */
+	public int getMargin() {
 		return frequency.getMargin() * 60;
 	}
 }
