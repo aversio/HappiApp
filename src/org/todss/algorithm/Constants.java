@@ -9,7 +9,7 @@ public class Constants {
 	/**
 	 * The maximum amount of intake moments we can move/shift/demarcate.
 	 */
-	public static int MAX_INTAKE_MOMENTS = 3;
+	public static int MAX_INTAKE_MOMENTS = 4;
 
 	/**
 	 * Whether we're allowed to plan an intake moment while traveling.

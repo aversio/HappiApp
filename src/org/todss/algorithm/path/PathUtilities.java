@@ -184,7 +184,7 @@ public class PathUtilities {
 				}
 			}
 		}
-		if (ENABLE_INTAKE_WHILE_TRAVELING && result.size() == 0 && steps == MAX_INTAKE_MOMENTS) {
+		if (ENABLE_INTAKE_WHILE_TRAVELING && result.size() == 0) {
 			result.add(getShortestPath(paths));
 		}
 		return result;
