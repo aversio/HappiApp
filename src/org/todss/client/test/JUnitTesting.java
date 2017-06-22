@@ -24,7 +24,7 @@ public class JUnitTesting {
 	/**
 	 * If we have to write the intakes after a test.
 	 */
-	private static final boolean WRITE_INTAKES = false;
+	private static final boolean WRITE_INTAKES = true;
 
 	/**
 	 * The algorithm instance we use.
@@ -34,7 +34,7 @@ public class JUnitTesting {
 	/**
 	 * The alarm used to test our scenario's.
 	 */
-	private static final Alarm ALARM = new Alarm(Frequency.DAY, ZonedDateTime.parse("2017-04-07T08:00+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")));
+	private static final Alarm ALARM = new Alarm(Frequency.DAY, ZonedDateTime.parse("2017-04-07T23:00+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")));
 
 	/**
 	 * Test the algorithm.
@@ -424,6 +424,17 @@ public class JUnitTesting {
 				ZonedDateTime.parse("2017-03-25T10:20+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
 		);
 		travels.add(returnTrip);
+		final List<Intake> intakes = test(travels);
+	}
+
+	@Test
+	public void tes24(){
+		List<Travel> travels = new ArrayList<>();
+		Travel firstJourney = new Travel(
+				ZonedDateTime.parse("2017-06-22T14:56+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
+				ZonedDateTime.parse("2017-06-23T18:56+00:00").withZoneSameLocal(ZoneId.of("America/Barbados"))
+		);
+		travels.add(firstJourney);
 		final List<Intake> intakes = test(travels);
 	}
 

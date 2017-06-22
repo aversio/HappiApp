@@ -104,6 +104,15 @@ public class SmartAlgorithm implements Algorithm {
 			}
 			list.set(i, new Intake(current));
 		}
+
+		/*for (Intake intake : list) {
+			intake.setDate(
+					intake.getDate().withZoneSameInstant(
+							getZoneId(intake.getDate(), context.getTravels())
+					)
+			);
+		}*/
+
 		return list;
 	}
 
@@ -192,7 +201,7 @@ public class SmartAlgorithm implements Algorithm {
 			return null;
 		}
 		List<Path> availablePaths = PathUtilities.findPathsForTargetDate(steps, difference, start, after ? arrival : departure, frequency, after);
-		while(steps != MAX_INTAKE_MOMENTS) {
+		while(steps != MAX_INTAKE_MOMENTS && availablePaths.size() == 0) {
 			availablePaths = PathUtilities.findPathsForTargetDate(MAX_INTAKE_MOMENTS, difference, start, after ? arrival : departure, frequency, after);
 			if (availablePaths.size() != 0) {
 				break;
@@ -231,9 +240,35 @@ public class SmartAlgorithm implements Algorithm {
 			} else {
 				previous = previous.minusHours(step);
 			}
-			list.set(after ? (index + i + 1) : (index - i), new Intake(previous));
+			final int newIndex = after ? (index + i + 1) : (index - i);
+			if (false/*previous.isEqual(arrival) || previous.isAfter(arrival)*/) {
+				list.set(newIndex, new Intake(previous.withZoneSameInstant(arrival.getZone())));
+			} else {
+				list.set(newIndex, new Intake(previous));
+			}
 		}
 		return path.getSteps().length;
+	}
+
+	/**
+	 * Get the zone-id by a date-time, calculated with the travel.
+	 *
+	 * @param dateTime date-time for calculating zone-id
+	 * @param travels travels for the intakes
+	 * @return zone-id belonging to date-time
+	 */
+	private ZoneId getZoneId(ZonedDateTime dateTime, List<Travel> travels) {
+		ZoneId prevZoneId = travels.get(0).getDeparture().getZone();
+
+		for (Travel travel : travels) {
+			if (dateTime.isEqual(travel.getArrival()) || dateTime.isAfter(travel.getArrival())) {
+				prevZoneId = travel.getArrival().getZone();
+
+				return prevZoneId;
+			}
+		}
+
+		return prevZoneId;
 	}
 
 }

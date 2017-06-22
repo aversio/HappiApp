@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.todss.algorithm.Constants.ENABLE_INTAKE_WHILE_TRAVELING;
-import static org.todss.algorithm.Constants.MAX_INTAKE_MOMENTS;
 
 /**
  * A class used to utilize the path system of this application.

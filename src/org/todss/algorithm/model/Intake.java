@@ -12,7 +12,7 @@ public class Intake {
 	/**
 	 * The intake date.
 	 */
-	private final ZonedDateTime date;
+	private ZonedDateTime date;
 
 	/**
 	 * Construct a new {@code Intake} {@code Object}.
@@ -37,6 +37,14 @@ public class Intake {
 	 */
 	public ZonedDateTime getDate() {
 		return date;
+	}
+
+	/**
+	 * Set the date.
+	 * @return {@code date}
+	 */
+	public void setDate(ZonedDateTime date) {
+		this.date = date;
 	}
 
 	@Override

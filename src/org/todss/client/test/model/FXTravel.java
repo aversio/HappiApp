@@ -36,8 +36,17 @@ public class FXTravel {
         this.arrival.set(arrival);
     }
 
+    public void setTravel(ZonedDateTime departure, ZonedDateTime arrival) {
+		this.departure.set(departure);
+		this.arrival.set(arrival);
+    }
+
     public Travel toTravel() {
         return new Travel(departure.get(), arrival.get());
     }
 
+	@Override
+	public String toString() {
+		return "FXTravel{" + "departure=" + departure + ", arrival=" + arrival + '}';
+	}
 }

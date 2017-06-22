@@ -312,7 +312,9 @@ public class BruteAlgorithm implements Algorithm {
             if (newPath.getCost() > maxCost) {
                 continue;
             }
-
+			if (paths == null) {
+				System.out.println("faka deze newpath=" + newPath);
+			}
             paths.add(newPath);
 
 //            List<Path> sameMarginPaths = new ArrayList<>();

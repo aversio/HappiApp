@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -130,6 +131,7 @@ public class MainController implements Initializable {
     public static MainController mainController;
     private Client client = Client.getInstance();
     private List<Algorithm> algorithms = new ArrayList<>();
+    private boolean noSave = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -330,7 +332,9 @@ public class MainController implements Initializable {
         });
 
         travelsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            FXTravel travel = observable.getValue();
+        	noSave = true;
+
+        	FXTravel travel = newValue;
 
             if (travel != null) {
                 travelActiveCheckBox.setSelected(getSelectedPreset().isTravelActive(travel));
@@ -338,13 +342,13 @@ public class MainController implements Initializable {
                 if (travel.getDeparture() != null) {
                     travelDepartureTimeTextField.setText(travel.getDeparture().format(DateTimeFormatter.ofPattern("k:mm")));
                     travelDepartureDatePicker.setValue(travel.getDeparture().toLocalDate());
-                    travelDepartureTimeZoneComboBox.setValue(travel.getDeparture().getZone().toString());
+                    travelDepartureTimeZoneComboBox.getSelectionModel().select(travel.getDeparture().getZone().toString());
                 }
 
                 if (travel.getArrival() != null) {
                     travelArrivalTimeTextField.setText(travel.getArrival().format(DateTimeFormatter.ofPattern("k:mm")));
                     travelArrivalDatePicker.setValue(travel.getArrival().toLocalDate());
-                    travelArrivalTimeZoneComboBox.setValue(travel.getArrival().getZone().toString());
+					travelArrivalTimeZoneComboBox.getSelectionModel().select(travel.getArrival().getZone().toString());
                 }
             } else {
                 travelDepartureTimeTextField.clear();
@@ -359,6 +363,9 @@ public class MainController implements Initializable {
             }
 
             travelContentVBox.setDisable(travel == null);
+
+			noSave = false;
+			savePreset();
         });
 
         travelDepartureTimeTextField.setOnKeyReleased(event -> {
@@ -372,7 +379,7 @@ public class MainController implements Initializable {
         travelDepartureDatePicker.setOnAction(event -> savePreset());
         travelArrivalDatePicker.setOnAction(event -> savePreset());
         travelDepartureTimeZoneComboBox.setOnAction(event -> savePreset());
-        travelArrivalTimeZoneComboBox.setOnAction(event -> savePreset());
+        travelArrivalTimeZoneComboBox.setOnAction(event -> savePreset() );
 
         travelActiveCheckBox.setOnAction(event -> savePreset());
 
@@ -492,9 +499,10 @@ public class MainController implements Initializable {
     }
 
     private void saveTravels() {
-        FXTravel travel = travelsListView.getSelectionModel().getSelectedItem();
+		FXTravel travel = travelsListView.getSelectionModel().getSelectedItem();
 
-        if (travelDepartureDatePicker.getValue() != null
+		if (travel != null
+        		&& travelDepartureDatePicker.getValue() != null
                 && !travelDepartureTimeTextField.getText().isEmpty()
                 && validateTime(travelDepartureTimeTextField.getText())
                 && travelDepartureTimeZoneComboBox.getValue() != null
@@ -505,15 +513,12 @@ public class MainController implements Initializable {
                 && travelArrivalTimeZoneComboBox.getValue() != null
                 && !travelArrivalTimeZoneComboBox.getValue().isEmpty()
                 ) {
-            travel.setDeparture(
+            travel.setTravel(
                     ZonedDateTime.of(
                             travelDepartureDatePicker.getValue(),
                             getTime(travelDepartureTimeTextField.getText()),
                             ZoneId.of(travelDepartureTimeZoneComboBox.getValue())
-                    )
-            );
-
-            travel.setArrival(
+                    ),
                     ZonedDateTime.of(
                             travelArrivalDatePicker.getValue(),
                             getTime(travelArrivalTimeTextField.getText()),
@@ -522,33 +527,55 @@ public class MainController implements Initializable {
             );
 
             getSelectedPreset().setTravelActive(travel, travelActiveCheckBox.isSelected());
-        }
-    }
+        } else {
+			System.out.println("Invalid travel");
+		}
+	}
 
     private void savePreset() {
-        saveAlarms();
-        saveTravels();
+    	if (!noSave) {
+			saveAlarms();
+			saveTravels();
+		}
 
-        new Thread(this::showIntakes).start();
+		if (travelsListView.getSelectionModel().getSelectedItem() != null) {
+			intakesTreeTableView.setPlaceholder(new Text("Loading..."));
+
+			new Thread(this::showIntakes).start();
+		}
     }
 
     private void showIntakes() {
         Alarm alarm = getSelectedPreset().getAlarms()[0];
         List<Travel> travels = new ArrayList<>();
-        for(FXTravel travel : getSelectedPreset().getTravelList()) {
+		ObservableList<FXTravel> fxTravels = getSelectedPreset().getTravelList();
+        for(FXTravel travel : fxTravels) {
             travels.add(travel.toTravel());
         }
 
         Algorithm algorithm = algorithmChoiceBox.getValue();
-        List<Intake> intakes = algorithm.run(new AlgorithmContext(alarm, travels));
-        this.intakes = intakes;
+
+        if (algorithm instanceof BruteAlgorithm) {
+        	travels.clear();
+        	travels.add(travelsListView.getSelectionModel().getSelectedItem().toTravel());
+		}
+
+        try {
+			this.intakes = algorithm.run(new AlgorithmContext(alarm, travels));
+		} catch(Exception e) {
+        	Platform.runLater(() -> {
+				intakesTreeTableView.setPlaceholder(new Text("An unknown error has occurred!"));
+			});
+		}
 
         TreeItem<Intake> root = new TreeItem<>();
         if (intakes != null && !intakes.isEmpty()) {
             for (Intake intake : intakes) {
                 root.getChildren().add(new TreeItem<>(intake));
             }
-        }
+        } else {
+			System.out.println("Empty intakes");
+		}
 
         Platform.runLater(() -> {
             intakesTreeTableView.setRoot(root);
@@ -560,6 +587,9 @@ public class MainController implements Initializable {
 
     private String rawIntakes(List<Intake> intakes) {
         StringBuilder output = new StringBuilder();
+
+        if (intakes == null || intakes.isEmpty())
+        	return output.toString();
 
         Intake prevIntake = null;
         for (int i = 0; i < intakes.size(); i++) {
