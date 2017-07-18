@@ -5,7 +5,7 @@ import java.time.ZonedDateTime;
 /**
  * A class representing a single intake moment.
  * @author Displee
- * @author Jonathan
+ * @author Jonathan Peeman
  */
 public class Intake {
 
@@ -40,8 +40,8 @@ public class Intake {
 	}
 
 	/**
-	 * Set the date.
-	 * @return {@code date}
+	 * Set a new date for this intake.
+	 * @param date The new date to set.
 	 */
 	public void setDate(ZonedDateTime date) {
 		this.date = date;
@@ -51,4 +51,5 @@ public class Intake {
 	public String toString() {
 		return date.toString();
 	}
+
 }

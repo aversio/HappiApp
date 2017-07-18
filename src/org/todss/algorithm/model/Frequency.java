@@ -1,28 +1,56 @@
 package org.todss.algorithm.model;
 
+import java.util.List;
+
 /**
- * Frequency
+ * An enumeration containing frequencies of medicines.
+ * @author Displee
+ * @author Jonahtan Peeman
  */
 public enum Frequency {
+
+	/**
+	 * The half-day frequency.
+	 */
     HALF_DAY(12, 2),
+
+	/**
+	 * The daily frequency.
+	 */
     DAY(24, 4);
 
-    private int hours;
+	/**
+	 * The hours.
+	 */
+	private int hours;
+
+	/**
+	 * The maximum possible margin to take.
+	 */
     private int margin;
 
     /**
-     * Frecuency for an alarm.
-     * @param hours the frequency of the alarm
-     * @param margin margin of the alarm
+     * Constructs a new {@code Frequency} {@code Object}.
+     * @param hours The frequency in hours.
+     * @param margin The margin in hours.
      */
     Frequency(int hours, int margin) {
         this.hours = hours;
         this.margin = margin;
     }
 
+	/**
+	 * Check if the argued hour {@code difference} is between the minimum and maximum margin range of this frequency.
+	 * @param difference The difference in hours.
+	 * @return If the difference is between the minimum and maximum margin range of this frequency.
+	 */
+	public boolean inRange(int difference) {
+    	return difference >= (hours - margin) && difference <= (hours + margin);
+	}
+
     /**
      * Get the frequency.
-     * @return frequency in hours
+     * @return {@code hours}
      */
     public int getHours() {
         return hours;
@@ -30,17 +58,18 @@ public enum Frequency {
 
     /**
      * Get the margin.
-     * @return margin in hours
+     * @return {@code margin}
      */
     public int getMargin() {
     	return margin;
 	}
 
     /**
-     * Get the margin.
-     * @return margin in minutes
+     * Get the frequency in minutes.
+     * @return The frequency in minutes.
      */
     public int getMinutes() {
         return hours * 60;
     }
+
 }

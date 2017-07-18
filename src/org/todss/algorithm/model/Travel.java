@@ -47,7 +47,7 @@ public class Travel {
 	}
 
 	/**
-	 * Get the hour difference between the departure and the arrival date.
+	 * Get the hour difference between the departure zone and the arrival zone.
 	 * @return The difference in hours.
 	 */
 	public int getDifference() {
@@ -71,4 +71,10 @@ public class Travel {
 	public ZonedDateTime getArrival() {
         return arrival;
     }
+
+    @Override
+    public String toString() {
+		return "Travel[departure=" + departure + ", arrival=" + arrival + "]";
+	}
+
 }

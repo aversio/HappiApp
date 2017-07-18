@@ -3,7 +3,7 @@ package org.todss.algorithm.path;
 import java.util.Arrays;
 
 /**
- * A class representing a single path.
+ * A class representing a single path that's being used by the SmartAlgorithm class.
  * @author Displee
  */
 public class Path {

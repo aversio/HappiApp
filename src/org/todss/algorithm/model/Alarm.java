@@ -5,7 +5,7 @@ import java.time.ZonedDateTime;
 /**
  * A class representing an alarm used to remind you.
  * @author Displee
- * @author Displee
+ * @author Jonathan Peeman
  */
 public class Alarm {
 

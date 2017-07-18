@@ -1,12 +1,14 @@
 package org.todss.algorithm.path;
 
 import org.todss.algorithm.impl.SmartAlgorithm;
+import org.todss.algorithm.model.DemarcateResult;
 import org.todss.algorithm.model.Frequency;
+import org.todss.algorithm.model.Intake;
+import org.todss.algorithm.model.Travel;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.todss.algorithm.Constants.ENABLE_INTAKE_WHILE_TRAVELING;
 
@@ -22,7 +24,7 @@ public class PathUtilities {
 	private static final int[] PATH_STEPS = getPathSteps();
 
 	/**
-	 * Calculate the default steps a {@link Path} can contain.
+	 * Calculate the steps a {@link Path} can contain.
 	 * @return The default steps.
 	 */
 	private static int[] getPathSteps() {
@@ -65,7 +67,7 @@ public class PathUtilities {
 	 * @param target The target amount.
 	 * @param min The minimum step size.
 	 * @param max The maximum step size.
-	 * @param steps The steps
+	 * @param steps The steps.
 	 * @return A 2D array of paths.
 	 */
 	private static List<Path> findPossiblePaths(int n, int target, int min, int max, int... steps) {
@@ -112,21 +114,141 @@ public class PathUtilities {
 	}
 
 	/**
-	 * Set the costs for a list of paths based on the distance of two dates.
-	 * @param paths The paths.
+	 * Find paths that are after or before the target date.
+	 * @param steps The minimum amount of steps.
+	 * @param difference The time difference.
 	 * @param start The start date.
-	 * @param arrival The arrival date.
+	 * @param travel The travel.
 	 * @param frequency The frequency.
+	 * @param after If we demarcate after the travel.
+	 * @return A list of paths.
 	 */
-	private static void setCosts(int steps, List<Path> paths, ZonedDateTime start, ZonedDateTime arrival, Frequency frequency, boolean after) {
+	public static List<Path> findPathsForTargetDate(int steps, int difference, ZonedDateTime start, Travel travel, Frequency frequency, boolean after) {
+		//final ZonedDateTime target = after ? travel.getArrival() : travel.getDeparture();
+		final List<Path> paths = PathUtilities.findPossiblePaths(steps, frequency.getMargin(), difference);
+		setCosts(steps, paths, travel, start, frequency, after);
+		final List<Path> result = new ArrayList<>();
 		for(Path path : paths) {
+			final DemarcateResult demarcateResult = process(path, travel, start, frequency, 0, after);
+			//Skip paths that are between the travel.
+			if (demarcateResult.betweenTravel(travel)) {
+				continue;
+			}
+			result.add(path);
+			/*ZonedDateTime next = (after ? demarcateResult.getFirst() : demarcateResult.getLast()).getDate();
+			if (after && next.getZone() != travel.getArrival().getZone()) {
+				next = next.withZoneSameInstant(travel.getArrival().getZone());
+			}
+			System.out.println("Faka deze=" + next + ", path=" + path + ", target_hour=" + target.getHour() + ", after=" + after);
+			if (after) {
+				final int targetHour = target.getHour() + (target.getMinute() == 0 ? 0 : 1);
+				if (next.getHour() >= targetHour) {
+					result.add(path);
+				}
+			} else {
+				if (next.isBefore(target)) {
+					result.add(path);
+				}
+			}*/
+		}
+		if (ENABLE_INTAKE_WHILE_TRAVELING && result.size() == 0) {
+			result.add(getShortestPath(paths));
+		}
+		return result;
+	}
+
+	/**
+	 * Run the demarcate process for the argued travel.
+	 * TODO Bug: when the travel takes less than the time difference of the arrival zone, it will fuckup the intake moment zones.
+	 * @param path The path we take.
+	 * @param travel The travel.
+	 * @param next The start date.
+	 * @param frequency The frequency.
+	 * @param currentIndex The current loop index.
+	 * @param after If we demarcate after the travel.
+	 * @return A demarcate result containing our new intake moments.
+	 */
+	public static DemarcateResult process(Path path, Travel travel, ZonedDateTime next, Frequency frequency, int currentIndex, boolean after) {
+		boolean addCurrent = true;
+		final Map<Integer, Intake> map = new LinkedHashMap<>();
+		if (after) {
+			next = next.withZoneSameInstant(travel.getArrival().getZone());
+		} else {
+			next = SmartAlgorithm.getNextIntakeDate(next, frequency, -path.getSteps().length + 1);
+		}
+		final int first = after ? 0 : (path.getSteps().length - 1);
+		//final int last = after ? (path.getSteps().length - 1) : 0;
+		int i = first;
+		//int cost = 0;
+		while(after ? (i < path.getSteps().length) : (i >= 0)) {
+			final int step = path.getSteps()[i];
+			if (i != first) {
+				next = SmartAlgorithm.getNextIntakeDate(next, frequency);
+			}
+			if (after) {
+				next = next.withZoneSameLocal(travel.getArrival().getZone());
+			}
+			if (after) {
+				next = next.plusHours(step);
+			} else {
+				next = next.minusHours(step);
+			}
+			ZonedDateTime toAdd = next;
+			if (after && i == first) {
+				addCurrent = false;
+			}
+			if (next.isBefore(travel.getArrival())) {
+				toAdd = next.withZoneSameInstant(travel.getDeparture().getZone());
+			} else if (next.isAfter(travel.getArrival())) {
+				toAdd = next.withZoneSameInstant(travel.getArrival().getZone());
+			}
+			final int newIndex = after ? (currentIndex + i) : (currentIndex - i + 1);
+			map.put(newIndex, new Intake(toAdd));
+			if (after) {
+				i++;
+			} else {
+				i--;
+			}
+		}
+		final DemarcateResult result = new DemarcateResult(path, addCurrent, map);
+		//determine the costs based on how fast we can get to our desired last intake
+		//TODO Fix costs, currently uses a not logical concept, but it works. See #setCosts method.
+		/*final Intake lastIntake = result.getLast();
+		int position = 1;
+		for(Map.Entry<Integer, Intake> entry : map.entrySet()) {
+			cost += Duration.between(original, entry.getValue().getDate()).toMinutes();
+		}*/
+		/*for (Map.Entry<Integer, Intake> entry : map.entrySet()) {
+			if (after) {
+				cost += Duration.between(idk, entry.getValue().getDate()).toMinutes();
+			} else {
+				cost += Duration.between(entry.getValue().getDate(), lastIntake.getDate()).toMinutes();
+			}
+		}*/
+		//path.setCost(cost);
+		return result;
+	}
+
+	/**
+	 * Set the costs of the argued paths.
+	 * //TODO Fix this. It's currently not logical, but it works.
+	 * @param steps The amount of steps to take.
+	 * @param paths The paths.
+	 * @param travel The travel.
+	 * @param start The start date.
+	 * @param frequency The frequency.
+	 * @param after If we demarcate after the travel.
+	 */
+	private static void setCosts(int steps, List<Path> paths, Travel travel, ZonedDateTime start, Frequency frequency, boolean after) {
+		for(Path path : paths) {
+			//final DemarcateResult result = process(path, travel, start, frequency, 0, after);
 			//we create a copy here of start
 			ZonedDateTime next = start.minusHours(0);
 			int cost = 0;
 			//we create a copy here of temp
 			final ZonedDateTime original;
 			if (after) {
-				original = next.withZoneSameInstant(arrival.getZone());
+				original = next.withZoneSameInstant(travel.getArrival().getZone());
 			} else {
 				original = SmartAlgorithm.getNextIntakeDate(next, frequency, -steps);
 			}
@@ -146,48 +268,6 @@ public class PathUtilities {
 		}
 	}
 
-	/**
-	 * Find paths that are after or before the target date.
-	 * @param steps The minimum amount of steps.
-	 * @param difference The time difference.
-	 * @param start The start date.
-	 * @param targetDate The target date.
-	 * @param frequency The frequency.
-	 * @param after If we demarcate afterwards.
-	 * @return A list of paths.
-	 */
-	public static List<Path> findPathsForTargetDate(int steps, int difference, ZonedDateTime start, ZonedDateTime targetDate, Frequency frequency, boolean after) {
-		final List<Path> paths = PathUtilities.findPossiblePaths(steps, frequency.getMargin(), difference);
-		PathUtilities.setCosts(steps, paths, start, targetDate, frequency, after);
-		final List<Path> result = new ArrayList<>();
-		for(Path path : paths) {
-			ZonedDateTime next = SmartAlgorithm.getNextIntakeDate(start, frequency, after).withZoneSameLocal(targetDate.getZone());
-			final int step;
-			if (after) {
-				step = path.getSteps()[0];
-			} else {
-				step = path.getLastStep();
-			}
-			if (step < 0) {
-				next = next.plusHours(step);
-			} else {
-				next = next.minusHours(step);
-			}
-			if (after) {
-				if (next.getHour() > targetDate.getHour()) {
-					result.add(path);
-				}
-			} else {
-				if (next.isBefore(targetDate)) {
-					result.add(path);
-				}
-			}
-		}
-		if (ENABLE_INTAKE_WHILE_TRAVELING && result.size() == 0) {
-			result.add(getShortestPath(paths));
-		}
-		return result;
-	}
 
 	/**
 	 * Find the shortest path in a list of paths.

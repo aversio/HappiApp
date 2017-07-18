@@ -5,10 +5,15 @@ import org.todss.algorithm.model.Intake;
 import java.util.List;
 
 /**
- * A class representing our base class for an algorithm implementation.
+ * An interface representing a skeleton for an algorithm implementation.
  * @author Displee
  */
 public interface Algorithm {
+
+	/**
+	 * Get the name of this algorithm.
+	 * @return The name of this algorithm.
+	 */
 	String name();
 
 	/**
@@ -17,4 +22,5 @@ public interface Algorithm {
 	 * @return A list of intake moments.
 	 */
 	List<Intake> run(AlgorithmContext context);
+
 }

@@ -34,7 +34,7 @@ public class JUnitTesting {
 	/**
 	 * The alarm used to test our scenario's.
 	 */
-	private static final Alarm ALARM = new Alarm(Frequency.DAY, ZonedDateTime.parse("2017-04-07T23:00+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")));
+	private static final Alarm ALARM = new Alarm(Frequency.DAY, ZonedDateTime.parse("2017-04-07T08:00+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")));
 
 	/**
 	 * Test the algorithm.
@@ -65,27 +65,21 @@ public class JUnitTesting {
 		final List<Intake> list = ALGORITHM.run(context);
 		System.out.println("Took " + (System.currentTimeMillis() - start) + " ms.");
 		assert list != null && list.size() > 0;
-		if (WRITE_INTAKES) {
-			writeIntakes(list);
+		for(int i = 0; i < list.size(); i++) {
+			final Intake current = list.get(i);
+			if (i != 0) {
+				final Intake previous = list.get(i - 1);
+				final int difference = (int) Duration.between(previous.getDate(), current.getDate()).toHours();
+				assert context.getAlarm().getFrequency().inRange(difference);
+				if (WRITE_INTAKES) {
+					System.out.println(String.format("\t+%s", difference));
+				}
+			}
+			if (WRITE_INTAKES) {
+				System.out.println(String.format("[%d] %s", i, current.getDate()));
+			}
 		}
 		return list;
-	}
-
-	/**
-	 * Write a list of intake moments in a fancy format.
-	 * @param intakes The list of intakes to write.
-	 */
-	private void writeIntakes(List<Intake> intakes) {
-		Intake prevIntake = null;
-		for (int i = 0; i < intakes.size(); i++) {
-			Intake intake = intakes.get(i);
-			if (prevIntake != null) {
-				Duration difference = Duration.between(prevIntake.getDate(), intake.getDate());
-				System.out.println(String.format("\t+%s", difference.toHours()));
-			}
-			System.out.println(String.format("[%d] %s", i, intake.getDate()));
-			prevIntake = intake;
-		}
 	}
 
 	/**
@@ -109,7 +103,7 @@ public class JUnitTesting {
 		List<Travel> travels = new ArrayList<>();
 		Travel journey = new Travel(
 				ZonedDateTime.parse("2017-06-16T10:55+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
-				ZonedDateTime.parse("2017-06-16T11:55+00:00").withZoneSameLocal(ZoneId.of("America/Los_Angeles"))
+				ZonedDateTime.parse("2017-06-16T19:55+00:00").withZoneSameLocal(ZoneId.of("America/Los_Angeles"))
 		);
 		travels.add(journey);
 		Travel returnTrip = new Travel(
@@ -337,12 +331,12 @@ public class JUnitTesting {
 		List<Travel> travels = new ArrayList<>();
 		Travel journey = new Travel(
 				ZonedDateTime.parse("2017-09-21T13:30+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
-				ZonedDateTime.parse("2017-09-21T14:40+00:00").withZoneSameLocal(ZoneId.of("Europe/Antwerpen"))
+				ZonedDateTime.parse("2017-09-21T14:40+00:00").withZoneSameLocal(ZoneId.of("Europe/Brussels"))
 		);
 		travels.add(journey);
 		Travel returnTrip = new Travel(
-				ZonedDateTime.parse("2017-09-24T20:15+00:00").withZoneSameLocal(ZoneId.of("Europe/Antwerpen")),
-				ZonedDateTime.parse("2017-09-34T21:25+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
+				ZonedDateTime.parse("2017-09-24T20:15+00:00").withZoneSameLocal(ZoneId.of("Europe/Brussels")),
+				ZonedDateTime.parse("2017-09-24T21:25+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
 		);
 		travels.add(returnTrip);
 		final List<Intake> intakes = test(travels);
@@ -371,11 +365,11 @@ public class JUnitTesting {
 		List<Travel> travels = new ArrayList<>();
 		Travel jouney = new Travel(
 				ZonedDateTime.parse("2017-08-21T17:40+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
-				ZonedDateTime.parse("2017-08-22T01:20+00:00").withZoneSameLocal(ZoneId.of("Asia/Teheran"))
+				ZonedDateTime.parse("2017-08-22T01:20+00:00").withZoneSameLocal(ZoneId.of("Asia/Tehran"))
 		);
 		travels.add(jouney);
 		Travel returnTrip = new Travel(
-				ZonedDateTime.parse("2017-08-25T09:00+00:00").withZoneSameLocal(ZoneId.of("Asia/Teheran")),
+				ZonedDateTime.parse("2017-08-25T09:00+00:00").withZoneSameLocal(ZoneId.of("Asia/Tehran")),
 				ZonedDateTime.parse("2017-08-25T17:20+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
 		);
 		travels.add(returnTrip);
@@ -411,7 +405,7 @@ public class JUnitTesting {
 		List<Travel> travels = new ArrayList<>();
 		Travel firstJourney = new Travel(
 				ZonedDateTime.parse("2017-03-21T17:40+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
-				ZonedDateTime.parse("2017-03-21T18:80+00:00").withZoneSameLocal(ZoneId.of("Europe/Brussels"))
+				ZonedDateTime.parse("2017-03-21T18:40+00:00").withZoneSameLocal(ZoneId.of("Europe/Brussels"))
 		);
 		travels.add(firstJourney);
 		Travel secondJourney = new Travel(
@@ -424,17 +418,6 @@ public class JUnitTesting {
 				ZonedDateTime.parse("2017-03-25T10:20+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam"))
 		);
 		travels.add(returnTrip);
-		final List<Intake> intakes = test(travels);
-	}
-
-	@Test
-	public void tes24(){
-		List<Travel> travels = new ArrayList<>();
-		Travel firstJourney = new Travel(
-				ZonedDateTime.parse("2017-06-22T14:56+00:00").withZoneSameLocal(ZoneId.of("Europe/Amsterdam")),
-				ZonedDateTime.parse("2017-06-23T18:56+00:00").withZoneSameLocal(ZoneId.of("America/Barbados"))
-		);
-		travels.add(firstJourney);
 		final List<Intake> intakes = test(travels);
 	}
 
