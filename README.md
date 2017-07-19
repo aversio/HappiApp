@@ -20,6 +20,7 @@ The idea of multiple algorithms is that the patient can choose which scheme suit
 
 # Credits
 Credits for the Smart algorithm go to https://github.com/Displee
+<br/>
 Credits for the Brute alogirthm go to https://github.com/thec0mpler
 
 # License
